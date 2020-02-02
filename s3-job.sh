@@ -18,7 +18,7 @@ mkdir output
 
 
 #copy all files from s3 data store to local directory
-aws s3 cp s3://netcomdsd data/
+AWS_CONFIG_FILE=./.aws/credentials aws2 s3 cp s3://netcomdsd data/
 
 #invoke combination script that combines all files in Full/ and outputs the merged file into Full/Output/
 ./Deepsight_Aggregator.py
@@ -26,6 +26,6 @@ aws s3 cp s3://netcomdsd data/
 #We now have a MASTER.csv aggregate file built in output/
 #copy the file to our S3 bucket
 
-aws s3 cp output/MASTER.csv s3://netcomdsd
+aws2 s3 cp output/MASTER.csv s3://netcomdsd
 
 
