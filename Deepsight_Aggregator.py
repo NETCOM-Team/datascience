@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # -*- coding: utf-8 -*-
 """
 Spyder Editor
@@ -10,8 +12,8 @@ import os
 
 def main():
     print("Starting program")
-    inputPath = 'Full'
-    outputPath = 'Full/Output/'
+    inputPath = 'data'
+    outputPath = 'output/'
 #    input_file = path + '/IpRepBOT.csv'
     ipFileNames = "Deepsight IP"
     urlFileNames = "Deepsight URL"
