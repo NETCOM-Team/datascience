@@ -67,20 +67,8 @@ def main():
     asn_objects = []
     master_df = pd.read_csv('Full/Output/CLEANED.csv', low_memory=False)
     master_df.sort_values(by='ASN', inplace=True)
-#    master_df.to_csv('Full/Output/CLEANED_TEST.csv')
-    counter = 0
     last_asn = -1
     for x in range(len(master_df.index)):
-        existing_asn = -1
-#        print("ASN: ", master_df['ASN'][x])
-#        for y in range(0,len(asn_objects)):
-##            print('b')
-##            print(asn_objects[y].as_number)
-#            if(asn_objects[y].as_number == master_df['ASN'][x]):
-#                print("There is a match")
-#                existing_asn = y
-#                break
-##        print('c')
         if(last_asn == master_df['ASN'][x]):
 #            print("Amend last_asn")
             temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
@@ -96,9 +84,7 @@ def main():
             temp_asn.events_list.append(temp_event)
             asn_objects.append(temp_asn)
             last_asn = int(float(master_df['ASN'][x]))
-        counter += 1
-#        if(counter > 5):
-#            break
+
     with open('Full/Output/ASN_Scores.csv', 'w') as file:
       
        writer = csv.writer(file)
