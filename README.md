@@ -1,6 +1,6 @@
 # Instructions
 
-Note: Requires you to have docker installed on your system.
+Note: Requires you to have **docker desktop** installed on your system.
 
 ```bash
 git clone https://github.com/cmunetcoms20/datascience.git
