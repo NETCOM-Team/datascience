@@ -65,25 +65,16 @@ class ASN:
 def main():
     print("Creating ASN Objects")
     asn_objects = []
+    for x in range(0,500000):
+        asn_objects.append(ASN(x))
+        
     master_df = pd.read_csv('Full/Output/CLEANED.csv', low_memory=False)
     master_df.sort_values(by='ASN', inplace=True)
-    last_asn = -1
     for x in range(len(master_df.index)):
-        if(last_asn == master_df['ASN'][x]):
-#            print("Amend last_asn")
-            temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
-                               master_df['Confidence'][x], master_df['Hostility'][x],
-                               master_df['Reputation_Rating'][x])
-            asn_objects[-1].events_list.append(temp_event)
-        else:
-#            print("Create new ASN")
-            temp_asn = ASN(master_df['ASN'][x])
-            temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
-                               master_df['Confidence'][x], master_df['Hostility'][x],
-                               master_df['Reputation_Rating'][x])
-            temp_asn.events_list.append(temp_event)
-            asn_objects.append(temp_asn)
-            last_asn = int(float(master_df['ASN'][x]))
+        temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
+                           master_df['Confidence'][x], master_df['Hostility'][x],
+                           master_df['Reputation_Rating'][x])
+        asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
 
     with open('Full/Output/ASN_Scores.csv', 'w') as file:
       
