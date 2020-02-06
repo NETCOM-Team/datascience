@@ -2,6 +2,7 @@ import os
 import signal
 from subprocess import check_output
 import redis
+import pickle
 
 #for now this script assumes that redis-server is running in the background
 #later I will make it so that it does appropriate port/socket opening and closing etc/
@@ -29,4 +30,9 @@ for asn, ip in asn_dict.items():
 for key, val in r.zrevrange('asn_object_dict', 0, len(asn_dict), 'withscores'):
     print(key, val)
 
+pickled_asn = pickle.dumps(asn_dict)
+r.set('asn_mapping', pickled_asn)
+print(r.get('asn_mapping')) # this will be a hex string
+original_asn_dict = pickle.loads(r.get('asn_mapping'))
+print(original_asn_dict)
 #os.system("ps aux | grep 6379 | awk '{print $2}' | xargs kill -9")
