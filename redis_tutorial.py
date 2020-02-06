@@ -35,4 +35,5 @@ r.set('asn_mapping', pickled_asn)
 print(r.get('asn_mapping')) # this will be a hex string
 original_asn_dict = pickle.loads(r.get('asn_mapping'))
 print(original_asn_dict)
+print('test')
 #os.system("ps aux | grep 6379 | awk '{print $2}' | xargs kill -9")
