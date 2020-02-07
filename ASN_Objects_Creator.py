@@ -14,6 +14,7 @@ import csv
 import argparse
 import redis
 import pickle
+import pprint as pp
 
 class Event:
     def __init__(self,event_id, ip_address, confidence, hostility, reputation_rating):
@@ -34,14 +35,23 @@ class Event:
                 self.reputation_rating = 0
             self.score = self.create_score()
         except Exception as e:
-            print(e)
-            print(confidence, hostility, reputation_rating)
-
+            #print(e)
+            #print(confidence, hostility, reputation_rating)
+            pass
     def create_score(self):
         try:
             return self.confidence + self.reputation_rating
         except Exception as e:
-            print(e)
+            #print(e)
+            pass
+
+    def print_event(self):
+        fields = {'event_id': self.event_id, 'ip_address': self.ip_address,
+                    'confidence':self.confidence, 'hostility':self.hostility,
+                    'reputation_rating':self.reputation_rating, 'score': self.score}
+        pp.pprint(fields)
+        print()
+
 
 class ASN:
     def __init__(self):
@@ -53,7 +63,8 @@ class ASN:
         try:
             self.as_number = int(float(as_number))
         except Exception as e:
-            print(e)
+            #print(e)
+            pass
             self.as_number = 'Undefined'
         self.events_list = []
         self.score = 0
@@ -63,11 +74,17 @@ class ASN:
             try:
                 self.score += x.score
             except Exception as e:
-                print(e)
+                #print(e)
+                pass
 
-
-def print_asn_obj(asn_obj):
-    pass
+    def print_asn_obj(self):
+        print('---------------------------------')
+        print('as_number: {}'.format(self.as_number))
+        for item in self.events_list:
+            item.print_event()
+        print('score: {}'.format(self.score))
+        print('---------------------------------')
+        print()
 
 def main():
 
@@ -91,20 +108,25 @@ def main():
                            master_df['Reputation_Rating'][x])
         asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
 
+    for i in range(0,10):
+        asn_objects[i].print_asn_obj()
+
     pickled_asn_objs = pickle.dumps(asn_objects)
     r.set('asn_objects', pickled_asn_objs)
 
     #prints long ass string
     #print(r.get('asn_objects'))
+    original_asn_list = pickle.loads(r.get('asn_objects'))
+    #print(original_asn_list)
 
 
-    with open(args.outfile, 'w') as file:
-
-       writer = csv.writer(file)
-       writer.writerow(['ASN', 'Score'])
-       for x in asn_objects:
-           x.create_score()
-           writer.writerow([x.as_number, x.score])
+    # with open(args.outfile, 'w') as file:
+    #
+    #    writer = csv.writer(file)
+    #    writer.writerow(['ASN', 'Score'])
+    #    for x in asn_objects:
+    #        x.create_score()
+    #        writer.writerow([x.as_number, x.score])
 
 
 
