@@ -58,6 +58,7 @@ class ASN:
         self.as_number = 'TBD'
         self.events_list = []
         self.score = 0
+        self.has_events = False
 
     def __init__(self, as_number):
         try:
@@ -68,6 +69,7 @@ class ASN:
             self.as_number = 'Undefined'
         self.events_list = []
         self.score = 0
+        self.has_events = False
 
     def create_score(self):
         for x in self.events_list:
@@ -83,6 +85,7 @@ class ASN:
         for item in self.events_list:
             item.print_event()
         print('score: {}'.format(self.score))
+        print('has_events: {}'.format(self.has_events))
         print('---------------------------------')
         print()
 
@@ -107,17 +110,28 @@ def main():
                            master_df['Confidence'][x], master_df['Hostility'][x],
                            master_df['Reputation_Rating'][x])
         asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
+        asn_objects[master_df['ASN'][x]].has_events = True
 
-    for i in range(0,10):
-        asn_objects[i].print_asn_obj()
+    # for obj in asn_objects:
+    #     if obj.has_events:
+    #         obj.print_asn_obj()
 
-    pickled_asn_objs = pickle.dumps(asn_objects)
-    r.set('asn_objects', pickled_asn_objs)
+    #TODO only serialize objects with events and add them to some data structure in redis
+
+    # for obj in asn_objects:
+    #     if obj.has_events:
+    #         pickled_asn_obj = pickle.dumps(obj)
+    #         r.set('asn_objects', pickled_asn_obj)
+    #
+    # asn_only_events_list = pickle.loads(r.get('asn_objects'))
+    # print(asn_only_events_list)
+
+    # for item in original_asn_list:
+    #     item.print_asn_obj()
 
     #prints long ass string
     #print(r.get('asn_objects'))
-    original_asn_list = pickle.loads(r.get('asn_objects'))
-    #print(original_asn_list)
+
 
 
     # with open(args.outfile, 'w') as file:
@@ -127,8 +141,6 @@ def main():
     #    for x in asn_objects:
     #        x.create_score()
     #        writer.writerow([x.as_number, x.score])
-
-
 
 if __name__ == "__main__":
     main()
