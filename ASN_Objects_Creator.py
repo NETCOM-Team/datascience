@@ -13,8 +13,9 @@ import re
 import csv
 import argparse
 import redis
-import pickle
 import pprint as pp
+import json
+import pickle
 
 class Event:
     def __init__(self,event_id, ip_address, confidence, hostility, reputation_rating):
@@ -100,6 +101,7 @@ def main():
 
     print("Creating ASN Objects")
     asn_objects = []
+    event_objs = []
     for x in range(0,500000):
         asn_objects.append(ASN(x))
 
@@ -111,6 +113,8 @@ def main():
                            master_df['Reputation_Rating'][x])
         asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
         asn_objects[master_df['ASN'][x]].has_events = True
+        #r.hmset(asn_objects[master_df['ASN'][x]].as_number, json.dumps(asn_objects[master_df['ASN'][x]]))
+        event_objs.append(asn_objects[master_df['ASN'][x]])
 
     # for obj in asn_objects:
     #     if obj.has_events:
@@ -118,13 +122,14 @@ def main():
 
     #TODO only serialize objects with events and add them to some data structure in redis
 
-    # for obj in asn_objects:
-    #     if obj.has_events:
-    #         pickled_asn_obj = pickle.dumps(obj)
-    #         r.set('asn_objects', pickled_asn_obj)
-    #
-    # asn_only_events_list = pickle.loads(r.get('asn_objects'))
-    # print(asn_only_events_list)
+
+
+    pickled_event_objs = pickle.dumps(event_objs)
+    r.set('asn_event_objs', pickled_event_objs)
+
+    asn_only_events_list = pickle.loads(r.get('asn_event_objs'))
+    for i in range(0,10):
+        asn_only_events_list[i].print_asn_obj()
 
     # for item in original_asn_list:
     #     item.print_asn_obj()
