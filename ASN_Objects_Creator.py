@@ -116,27 +116,14 @@ def main():
         #r.hmset(asn_objects[master_df['ASN'][x]].as_number, json.dumps(asn_objects[master_df['ASN'][x]]))
         event_objs.append(asn_objects[master_df['ASN'][x]])
 
-    # for obj in asn_objects:
-    #     if obj.has_events:
-    #         obj.print_asn_obj()
-
-    #TODO only serialize objects with events and add them to some data structure in redis
 
 
-
-    pickled_event_objs = pickle.dumps(event_objs)
-    r.set('asn_event_objs', pickled_event_objs)
-
-    asn_only_events_list = pickle.loads(r.get('asn_event_objs'))
-    for i in range(0,10):
-        asn_only_events_list[i].print_asn_obj()
-
-    # for item in original_asn_list:
-    #     item.print_asn_obj()
-
-    #prints long ass string
-    #print(r.get('asn_objects'))
-
+    print(len(event_objs))
+    #kill this whenever
+    # for item in event_objs:
+    #     r.set(item.as_number, pickle.dumps(item))
+    #     temp = pickle.loads(r.get(item.as_number))
+    #     temp.print_asn_obj()
 
 
     # with open(args.outfile, 'w') as file:
