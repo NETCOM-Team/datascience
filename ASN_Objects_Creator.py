@@ -114,11 +114,15 @@ def main():
         asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
         asn_objects[master_df['ASN'][x]].has_events = True
         #r.hmset(asn_objects[master_df['ASN'][x]].as_number, json.dumps(asn_objects[master_df['ASN'][x]]))
-        event_objs.append(asn_objects[master_df['ASN'][x]])
+        # event_objs.append(asn_objects[master_df['ASN'][x]])
 
+    for obj in asn_objects:
+        if obj.has_events:
+            event_objs.append(obj)
+            r.set(obj.as_number, pickle.dumps(obj))
+            temp = pickle.loads(r.get(obj.as_number))
+            temp.print_asn_obj()
 
-
-    print(len(event_objs))
     #kill this whenever
     # for item in event_objs:
     #     r.set(item.as_number, pickle.dumps(item))
