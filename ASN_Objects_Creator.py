@@ -36,8 +36,12 @@ class Event:
             print(confidence, hostility, reputation_rating)
         
     def create_score(self):
+        temp_score = self.hostility + self.confidence + self.reputation_rating
         try:
-            return self.confidence + self.reputation_rating
+            if(self.hostility == 0):
+                return (temp_score / 15)
+            else:
+                return (temp_score / 20)
         except Exception as e: 
             print(e)
     
@@ -46,7 +50,7 @@ class ASN:
         self.as_number = 'TBD'
         self.events_list = []
         self.score = 0
-        self.max_ips = 0
+        self.total_ips = 0
     
     def __init__(self, as_number):
         try:
@@ -56,7 +60,7 @@ class ASN:
             self.as_number = 'Undefined'
         self.events_list = []
         self.score = 0
-        self.max_ips = 0
+        self.total_ips = 0
     
     def create_score(self):
         for x in self.events_list:
@@ -64,8 +68,13 @@ class ASN:
                 self.score += x.score
             except Exception as e: 
                 print(e)
-    
    
+    def set_total_ips (self):
+        if(self.total_ips == 0):
+            self.total_ips = 256
+    
+    def create_badness(self):
+        self.badness = self.score / self.total_ips
         
         
         
@@ -86,14 +95,20 @@ def main():
     with open('Full/Output/ASN_Scores.csv', 'w') as file:
       
        writer = csv.writer(file)
-       writer.writerow(['ASN', 'Score', 'Max_IPs'])
+       writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness'])
        for x in asn_objects:
            x.create_score()
-           x.max_ips = geolite_df['Total_IPs'][x.as_number]
+           x.total_ips = geolite_df['Total_IPs'][x.as_number]
 #           print(x.max_ips)
-           if(x.score > 0):
-               writer.writerow([x.as_number, x.score, x.max_ips])
-        
+           if(x.total_ips > 0):
+               x.set_total_ips()
+               x.create_badness()
+               writer.writerow([x.as_number, x.score, x.total_ips, x.badness])
+           elif(x.score > 0):
+               x.set_total_ips()
+               x.create_badness()
+               writer.writerow([x.as_number, x.score, x.total_ips, x.badness])
+           
     
 if __name__ == "__main__":
     main()
