@@ -51,7 +51,7 @@ def create_whois_lookup(asn_df):
             
 def create_geolite_lookup(asn_df):
     print("Creating Geolite")
-    geo_df = pd.read_csv('geolite.csv', )
+    geo_df = pd.read_csv('Full/geolite.csv', )
     geo_df = geo_df.drop(geo_df.columns[[0, 1, 4]], axis=1)
     geo_df = geo_df[geo_df.ASN != '-']
     geo_df = geo_df.astype({'ASN': int})
