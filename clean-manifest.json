@@ -1,0 +1,21 @@
+{
+    "fileLocations": [
+        {
+            "URIs": [
+            "https://cmunetcoms20.s3.us-east-2.amazonaws.com/CLEANED.csv"]
+        },
+        {
+            "URIPrefixes": [
+                "prefix1",
+                "prefix2",
+                "prefix3"
+            ]
+        }
+    ],
+    "globalUploadSettings": {
+        "format": "CSV",
+        "delimiter": ",",
+        "textqualifier": "'",
+        "containsHeader": "true"
+    }
+}
