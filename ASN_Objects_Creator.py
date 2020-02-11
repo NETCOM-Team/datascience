@@ -16,6 +16,10 @@ import redis
 import pprint as pp
 import json
 import pickle
+from operator import itemgetter
+import networkx as nx
+from networkx.algorithms import community
+
 
 class Event:
     def __init__(self,event_id, ip_address, confidence, hostility, reputation_rating):
@@ -90,6 +94,32 @@ class ASN:
         print('---------------------------------')
         print()
 
+
+def create_asn_graph(asn_obj_dict):
+    G = nx.Graph()
+    for obj in asn_obj_dict:
+        G.add_node(obj.as_number)
+        for event in obj.events_list:
+            G.add_node(event.ip_address)
+            G.add_edge(event.ip_address, obj.as_number)
+    return G
+
+def print_eigenvector_centrality(centrality_struct):
+    ints = []
+    strs = []
+    for tup in centrality_struct.items():
+        if isinstance(tup[0], int):
+            ints.append(tup)
+        else:
+            strs.append(tup)
+    # for item in ints:
+    #     print(item)
+    # for item in strs:
+    #     print(item)
+
+    return ints
+
+
 def main():
 
     r = redis.Redis(host='localhost', port=6379, db=0)
@@ -116,19 +146,27 @@ def main():
         #r.hmset(asn_objects[master_df['ASN'][x]].as_number, json.dumps(asn_objects[master_df['ASN'][x]]))
         # event_objs.append(asn_objects[master_df['ASN'][x]])
 
+
     for obj in asn_objects:
         if obj.has_events:
             event_objs.append(obj)
-            r.set(obj.as_number, pickle.dumps(obj))
-            temp = pickle.loads(r.get(obj.as_number))
-            temp.print_asn_obj()
 
-    #kill this whenever
-    # for item in event_objs:
-    #     r.set(item.as_number, pickle.dumps(item))
-    #     temp = pickle.loads(r.get(item.as_number))
-    #     temp.print_asn_obj()
+    G = create_asn_graph(event_objs)
+    print(nx.info(G))
 
+    centrality = nx.eigenvector_centrality_numpy(G)
+    print_eigenvector_centrality(centrality)
+    x = print_eigenvector_centrality(centrality)
+    #print(x)
+
+    #The code block below serializes / deserializes asn objects and adds them
+    #as key value pairs in redis.
+    # for obj in asn_objects:
+    #     if obj.has_events:
+    #         event_objs.append(obj)
+    #         r.set(obj.as_number, pickle.dumps(obj))
+    #         temp = pickle.loads(r.get(obj.as_number))
+    #         temp.print_asn_obj()i
 
     # with open(args.outfile, 'w') as file:
     #
