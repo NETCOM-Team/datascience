@@ -8,6 +8,7 @@ Created on Mon Feb  3 14:08:22 2020
 
 import pandas as pd
 import csv
+import argparse
 
 #Event class for each entry in Datafeed
 class Event:
@@ -28,10 +29,10 @@ class Event:
             except:
                 self.reputation_rating = 0
             self.score = self.create_score()
-        except Exception as e: 
+        except Exception as e:
             print(e)
             print(confidence, hostility, reputation_rating)
-        
+
     def create_score(self):
         temp_score = self.hostility + self.confidence + self.reputation_rating
         try:
@@ -39,51 +40,59 @@ class Event:
                 return (temp_score / 15)
             else:
                 return (temp_score / 20)
-        except Exception as e: 
+        except Exception as e:
             print(e)
 
-#ASN object to use for future work    
+#ASN object to use for future work
 class ASN:
     def __init__(self):
         self.as_number = 'TBD'
         self.events_list = []
         self.score = 0
         self.total_ips = 0
-    
+
     def __init__(self, as_number):
         try:
             self.as_number = int(float(as_number))
-        except Exception as e: 
+        except Exception as e:
             print(e)
             self.as_number = 'Undefined'
         self.events_list = []
         self.score = 0
         self.total_ips = 0
-    
+
     def create_score(self):
         for x in self.events_list:
             try:
                 self.score += x.score
-            except Exception as e: 
+            except Exception as e:
                 print(e)
-   
+
     def set_total_ips (self):
         if(self.total_ips == 0):
             self.total_ips = 256
-    
+
     def create_badness(self):
         self.badness = self.score / self.total_ips
-        
-        
-# Creating ASN objects for all possible ASNS       
+
+
+# Creating ASN objects for all possible ASNS
 def creating_asns():
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--geolite', dest='geolite', help='geolite csv input file path')
+    parser.add_argument('--cleaned', dest='cleaned', help='cleaned CSV input file path')
+    parser.add_argument('--outfile', dest='outfile', help='output ASN/Score file path')
+
+    args = parser.parse_args()
+
     print("Creating ASN Objects")
     asn_objects = []
     MAX_RANGE = 600000
     for x in range(0,MAX_RANGE):
         asn_objects.append(ASN(x))
-    geolite_df = pd.read_csv('Data/Output/geolite_lookup.csv')
-    master_df = pd.read_csv("Data/Output/CLEANED.csv", low_memory=False)
+    geolite_df = pd.read_csv(args.geolite)
+    master_df = pd.read_csv(args.cleaned, low_memory=False)
     master_df.sort_values(by='ASN', inplace=True)
     for x in range(len(master_df.index)):
         temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
@@ -91,8 +100,8 @@ def creating_asns():
                            master_df['Reputation_Rating'][x])
         asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
 
-    with open('Data/Output/ASN_Scores.csv', 'w') as file:
-      
+    with open(args.outfile, 'w') as file:
+
        writer = csv.writer(file)
        writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness'])
        for x in asn_objects:
@@ -103,6 +112,3 @@ def creating_asns():
                x.set_total_ips()
                x.create_badness()
                writer.writerow([x.as_number, x.score, x.total_ips, x.badness])
-    
-    
-    
