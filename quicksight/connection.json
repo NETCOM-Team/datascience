@@ -1,0 +1,14 @@
+{
+    "AwsAccountId": "444558491062",
+    "DataSourceId": "abcdefg13asdafsad",
+    "Name": "cmunetcoms20Visualization",
+    "Type": "S3",
+    "DataSourceParameters": {
+        "S3Parameters": {
+            "ManifestFileLocation": {
+                "Bucket": "cmunetcoms20",
+                "Key": "asn-manifest.json"
+            }
+          }
+        }
+}
