@@ -10,11 +10,11 @@ This is a temporary script file.
 import pandas as pd
 import os
 
-def main():
-    print("Starting program")
-    inputPath = 'data'
-    outputPath = 'output/'
-#    input_file = path + '/IpRepBOT.csv'
+#Creating CSVs from Deepsight Data
+def creating_files():
+    print("Creating Files")
+    inputPath = 'Data/'
+    outputPath = 'Data/output/'
     ipFileNames = "Deepsight IP"
     urlFileNames = "Deepsight URL"
     ipFiles = []
@@ -71,32 +71,33 @@ def main():
                        'xml.domain.reputationRating':'Reputation_Rating'}
     ipFiles = get_files(inputPath, ipFileNames)
     urlFiles = get_files(inputPath, urlFileNames)
-    ipMaster_df = create_ip_url_master(inputPath, outputPath, ipFiles, c_size, ip_data_fields, "IP_Master")     
-    urlMaster_df = create_ip_url_master(inputPath, outputPath, urlFiles, c_size, url_data_fields, "URL_Master")
+    ipMaster_df = create_ip_url_master_df(inputPath, outputPath, ipFiles, c_size, ip_data_fields, "IP_Master")     
+    urlMaster_df = create_ip_url_master_df(inputPath, outputPath, urlFiles, c_size, url_data_fields, "URL_Master")
     ipMaster_df.rename(columns=ipNamesDict, inplace=True)
     urlMaster_df.rename(columns=urlNamesDict, inplace=True)
     total_master = pd.concat([ipMaster_df,urlMaster_df], axis=0, ignore_index=True, sort=False)
     total_master.to_csv(outputPath + 'MASTER.csv')
 
+#Getting the files that match a naming convention
 def get_files(inputPath, fileNames):
     file_list = []
     for i in os.listdir(inputPath):
         if(i.startswith(fileNames)):
             file_list.append(i)
-            print(i)
+            print("Creating " + i)
     return file_list
 
-def create_ip_url_master(inputPath, outputPath, files, c_size, data_fields, outputName):
-    master_df = pd.DataFrame()
+#Creating DFs for both IP and URL Deepsight Data
+def create_ip_url_master_df(inputPath, outputPath, files, c_size, data_fields, outputName):
+    df = pd.DataFrame()
     for file in files:
         df_chunk = pd.DataFrame()        
         for chunk in pd.read_csv(inputPath + '/' + file,chunksize=c_size, usecols=data_fields):
             df_chunk = pd.concat([df_chunk, chunk])
         
-        master_df = pd.concat([master_df, df_chunk])
+        df = pd.concat([df, df_chunk])
         df_chunk.to_csv(outputPath + 'output_' + file)
     
-    master_df.to_csv(outputPath + 'output_' + outputName + '.csv')
-    return master_df
+    df.to_csv(outputPath + 'output_' + outputName + '.csv')
+    return df
 
-main()

@@ -7,13 +7,11 @@ Created on Sat Feb  1 09:08:30 2020
 """
 
 import pandas as pd
-import numpy as np
-import re
 
-def main():
+#Cleaning master csv to only 1 IP and 1 ASN
+def cleaning_master():
     print("Cleaning Master")
-    master_df = pd.read_csv('Full/Output/MASTER.csv', low_memory=False)
-    print(master_df.index)
+    master_df = pd.read_csv('Data/Output/MASTER.csv', low_memory=False)
     drop_set = set()
     for x in range(len(master_df.index)):
         if(str(master_df['IP_Address'][x]) == 'nan'):
@@ -29,7 +27,5 @@ def main():
     master_df.drop(master_df.columns[0], axis = 1, inplace = True)
     master_df['ASN'] = pd.to_numeric(master_df['ASN'], downcast='integer')
     master_df.sort_values(by='ASN', inplace=True)
-    master_df.to_csv('Full/Output/CLEANED.csv')
+    master_df.to_csv('Data/Output/CLEANED.csv')
     
-if __name__ == "__main__":
-    main()
