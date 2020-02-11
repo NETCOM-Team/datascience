@@ -1,2 +1,5 @@
 pandas
 matplotlib
+subprocess
+ipaddress
+os

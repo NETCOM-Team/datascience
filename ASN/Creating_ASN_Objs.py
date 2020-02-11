@@ -7,12 +7,9 @@ Created on Mon Feb  3 14:08:22 2020
 """
 
 import pandas as pd
-import numpy as np
-import re
 import csv
-import subprocess
-import ipaddress
 
+#Event class for each entry in Datafeed
 class Event:
     def __init__(self,event_id, ip_address, confidence, hostility, reputation_rating):
         try:
@@ -44,7 +41,8 @@ class Event:
                 return (temp_score / 20)
         except Exception as e: 
             print(e)
-    
+
+#ASN object to use for future work    
 class ASN:
     def __init__(self):
         self.as_number = 'TBD'
@@ -77,14 +75,15 @@ class ASN:
         self.badness = self.score / self.total_ips
         
         
-        
-def main():
+# Creating ASN objects for all possible ASNS       
+def creating_asns():
     print("Creating ASN Objects")
     asn_objects = []
-    for x in range(0,600000):
+    MAX_RANGE = 600000
+    for x in range(0,MAX_RANGE):
         asn_objects.append(ASN(x))
-    geolite_df = pd.read_csv('Full/Output/geolite_lookup.csv')
-    master_df = pd.read_csv("Full/Output/CLEANED.csv", low_memory=False)
+    geolite_df = pd.read_csv('Data/Output/geolite_lookup.csv')
+    master_df = pd.read_csv("Data/Output/CLEANED.csv", low_memory=False)
     master_df.sort_values(by='ASN', inplace=True)
     for x in range(len(master_df.index)):
         temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
@@ -92,7 +91,7 @@ def main():
                            master_df['Reputation_Rating'][x])
         asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
 
-    with open('Full/Output/ASN_Scores.csv', 'w') as file:
+    with open('Data/Output/ASN_Scores.csv', 'w') as file:
       
        writer = csv.writer(file)
        writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness'])
@@ -100,40 +99,10 @@ def main():
            x.create_score()
            x.total_ips = geolite_df['Total_IPs'][x.as_number]
 #           print(x.max_ips)
-           if(x.total_ips > 0):
+           if(x.total_ips > 0 or x.score > 0):
                x.set_total_ips()
                x.create_badness()
                writer.writerow([x.as_number, x.score, x.total_ips, x.badness])
-           elif(x.score > 0):
-               x.set_total_ips()
-               x.create_badness()
-               writer.writerow([x.as_number, x.score, x.total_ips, x.badness])
-           
-    
-if __name__ == "__main__":
-    main()
     
     
-#def find_ips(self):
-#    try:
-#        ips = subprocess.check_output("whois -h whois.radb.net -- '-i origin AS" + str(self.as_number) +
-#                            "'| grep -Eo '([0-9.]+){4}/[0-9]+'",
-#                            shell=True).decode("utf-8")
-#    except Exception as e: 
-#            print(e)
-#            return False
-#    return ips.split('\n')[:-1]
-#
-#def create_max_ips(self):
-#    ips = self.find_ips()
-#    if(ips != False):
-#        try:
-#            for y in ips:
-#                try:
-#                    self.max_ips += ipaddress.ip_network(y).num_addresses
-#                except Exception as e: 
-#                    print(e)
-#        except Exception as e: 
-#                print(e)
-#    else:
-#        pass
+    

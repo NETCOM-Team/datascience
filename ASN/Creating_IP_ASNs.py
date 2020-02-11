@@ -5,17 +5,18 @@ Created on Sat Feb  8 17:33:33 2020
 
 @author: jacksonbrietzke
 """
-import csv
 import subprocess
 import ipaddress
 import pandas as pd
 
-def main():
-    print("Creating IPs")
-    asn_df = pd.read_csv("Full/Output/ASN_Scores.csv")
-    create_whois_lookup(asn_df)
-#    create_geolite_lookup(asn_df)
-   
+#Creating ASN lookups for ASN Objs to use
+def creating_ip_asn_lookups():
+    print("Creating IP/ASN Lookups")
+    asn_df = pd.read_csv("Data/Output/ASN_Scores.csv")
+#    create_whois_lookup(asn_df)
+    create_geolite_lookup(asn_df)
+ 
+#Running whois commands to find IP/ASN mapping
 def create_whois_lookup(asn_df):
     print("Creating WHOIS")
     asn_list = []
@@ -47,16 +48,16 @@ def create_whois_lookup(asn_df):
         asn_list[int(row['ASN'])] = [int(row['ASN']), total_ips]
     
     df = pd.DataFrame(asn_list, columns=['ASN', 'Total_IPs'])
-    df.to_csv('Full/Output/whois_lookup.csv')
-            
+    df.to_csv('Data/Output/whois_lookup.csv')
+ 
+#Creating Geolite csv to find IP/ASN mapping           
 def create_geolite_lookup(asn_df):
     print("Creating Geolite")
-    geo_df = pd.read_csv('Full/geolite.csv', )
+    geo_df = pd.read_csv('Data/geolite.csv', )
     geo_df = geo_df.drop(geo_df.columns[[0, 1, 4]], axis=1)
     geo_df = geo_df[geo_df.ASN != '-']
     geo_df = geo_df.astype({'ASN': int})
     print(geo_df.head())
-#    geo_df.columns=geo_df.columns.str.strip()
     geo_df.sort_values(by='ASN', inplace=True)
     asn_list = []
     for x in range(0,600000):
@@ -73,7 +74,5 @@ def create_geolite_lookup(asn_df):
             current_ip_total = ipaddress.ip_network(row['IP_CIDR']).num_addresses
     asn_list[current_ASN] = [current_ASN, current_ip_total]
     df = pd.DataFrame(asn_list, columns=['ASN', 'Total_IPs'])
-    df.to_csv('Full/Output/geolite_lookup.csv')
+    df.to_csv('Data/Output/geolite_lookup.csv')
 
-if __name__ == "__main__":
-    main()
