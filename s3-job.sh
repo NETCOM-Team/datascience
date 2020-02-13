@@ -7,9 +7,12 @@ echo $aws_access_key_id
 echo $aws_secret_access_key
 echo "above is debug"
 
-echo "[default]" > /root/.aws/credentials \
-&& echo "aws_access_key_id = $aws_access_key_id" >> /root/.aws/credentials \
-&& echo "aws_secret_access_key = $aws_secret_access_key" >> /root/.aws/credentials
+
+
+
+aws configure set aws_access_key_id $aws_access_key_id
+aws configure set aws_secret_access_key $aws_secret_access_key
+aws configure set default.region $REGION
 
 echo "AWS credential FILE: "
 echo ""
@@ -230,10 +233,12 @@ EOF
 aws2 quicksight create-data-set --cli-input-json file://asn-tablemap
 aws2 quicksight create-data-set --cli-input-json file://clean-tablemap
 
+# create quicksight dashboard from the exisiting template (query for dashboard/template arn?)
+
 #infinite loop to monitor the status of the s3 bucket and trigger quicksight updates upon changes
 #while true
 #do
-#    aws2 s3 sync s3://$BUCKET_NAME output_sync/ --exclude asn-manifest.json --exclude clean-manifest.json
+#    aws2 s3 sync s3://$BUCKET_NAME output_sync/ --exclude asn-manifest.json --exclude clean-manifest.json --recursive
 #    ./placeholder.py  # should read in the files and compile them into a new master list and write it to updated/
 #    aws2 s3 cp updated/MASTER.csv s3://$BUCKET_NAME
 
@@ -241,6 +246,7 @@ aws2 quicksight create-data-set --cli-input-json file://clean-tablemap
 #    aws2 quicksight update-data-set --cli-input-json file://asn-update-tablemap
 #    aws2 quicksight update-data-set --cli-input-json file://clean-update-tablemap
 
-
+#    
+#    add a line to refresh the quicksight dashboard
     #do we ever have a case where we need to break out of this? error handling?
 #done
