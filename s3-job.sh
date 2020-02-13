@@ -1,8 +1,21 @@
 #!/bin/bash
 
-BUCKET_NAME="analytics-pipeline-cmucybercom"
-REGION="us-east-1"
-ACCOUNT_ID="444558491062"
+echo $BUCKET_NAME
+echo $REGION
+echo $ACCOUNT_ID
+echo $aws_access_key_id
+echo $aws_secret_access_key
+echo "above is debug"
+
+echo "[default]" > /root/.aws/credentials \
+&& echo "aws_access_key_id = $aws_access_key_id" >> /root/.aws/credentials \
+&& echo "aws_secret_access_key = $aws_secret_access_key" >> /root/.aws/credentials
+
+echo "AWS credential FILE: "
+echo ""
+cat /root/.aws/credentials
+
+#set our random IDs so we don't step on other generated pipelines
 ASN_DATA_SOURCE_ID=ASNcmunetcom$RANDOM
 ASN_DATA_SET_ID=ASNcmunetcoms20$RANDOM
 CLEAN_DATA_SOURCE_ID=CLEANcmunetcom$RANDOM
@@ -11,20 +24,23 @@ CLEAN_DATA_SET_ID=CLEANcmunetcoms20$RANDOM
 #make directory to store our bucket files locally; make directory to save our MASTER.csv merge-file.
 mkdir data
 mkdir output_initial
-mkdir updated/
+mkdir updated
 mkdir output_sync
 
 #copy all files from s3 data store to local directory
-aws2 s3 cp s3://$BUCKET_NAME data/
+aws2 s3 cp s3://$BUCKET_NAME data/ --recursive
+echo "debug data from s3"
+ls data/
 
 #invoke combination script that combines all files in data/ and outputs the merged file into output_initial/
-./Deepsight_Aggregator.py
-
+./Aggregating_Deepsight.py
+echo "debug data in output_intitial"
+ls output_initial/
 #We now have a CLEANED.csv aggregate file built in output_initial/
 
 #copy the file to the S3 bucket and QuickSight
 
-aws2 s3 cp output_initial/MASTER.csv s3://$BUCKET_NAME
+aws2 s3 cp output_initial/output_MASTER.csv s3://$BUCKET_NAME
 
 
 
@@ -215,16 +231,16 @@ aws2 quicksight create-data-set --cli-input-json file://asn-tablemap
 aws2 quicksight create-data-set --cli-input-json file://clean-tablemap
 
 #infinite loop to monitor the status of the s3 bucket and trigger quicksight updates upon changes
-while true
-do
-    aws2 s3 sync s3://$BUCKET_NAME output_sync/ --exclude asn-manifest.json --exclude clean-manifest.json
-    ./placeholder.py  # should read in the files and compile them into a new master list and write it to updated/
-    aws2 s3 cp updated/MASTER.csv s3://$BUCKET_NAME
+#while true
+#do
+#    aws2 s3 sync s3://$BUCKET_NAME output_sync/ --exclude asn-manifest.json --exclude clean-manifest.json
+#    ./placeholder.py  # should read in the files and compile them into a new master list and write it to updated/
+#    aws2 s3 cp updated/MASTER.csv s3://$BUCKET_NAME
 
     #next 2 lines need testing for functionality before deployment, need to construct json inputs appropriately
-    aws2 quicksite update-data-set --cli-input-json file://asn-update-tablemap
-    aws2 quicksite update-data-set --cli-input-json file://clean-update-tablemap
+#    aws2 quicksight update-data-set --cli-input-json file://asn-update-tablemap
+#    aws2 quicksight update-data-set --cli-input-json file://clean-update-tablemap
 
 
     #do we ever have a case where we need to break out of this? error handling?
-done
+#done

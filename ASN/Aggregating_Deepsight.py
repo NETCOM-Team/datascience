@@ -13,8 +13,8 @@ import os
 #Creating CSVs from Deepsight Data
 def creating_files():
     print("Creating Files")
-    inputPath = 'Data/'
-    outputPath = 'Data/output/'
+    inputPath = 'data/'
+    outputPath = 'output_initial/'
     ipFileNames = "Deepsight IP"
     urlFileNames = "Deepsight URL"
     ipFiles = []
@@ -99,5 +99,6 @@ def create_ip_url_master_df(inputPath, outputPath, files, c_size, data_fields, o
         df_chunk.to_csv(outputPath + 'output_' + file)
     
     df.to_csv(outputPath + 'output_' + outputName + '.csv')
+    filetotal = outputPath + 'output_' + outputName + '.csv'
     return df
 
