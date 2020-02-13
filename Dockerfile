@@ -7,8 +7,9 @@ RUN curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o 
 
 COPY ["./placeholder.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
-COPY ["./Deepsight_Aggregator.py", "${APPROOT}"]
+COPY ["ASN/", "${APPROOT}"]
 COPY ["./requirements.txt", "${APPROOT}"]
+RUN ls -la ${APPROOT}
 RUN pip3 install -r requirements.txt
 
 

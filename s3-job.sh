@@ -215,8 +215,8 @@ aws2 quicksight create-data-set --cli-input-json file://asn-tablemap
 aws2 quicksight create-data-set --cli-input-json file://clean-tablemap
 
 #infinite loop to monitor the status of the s3 bucket and trigger quicksight updates upon changes
-while:
-  do
+while true
+do
     aws2 s3 sync s3://$BUCKET_NAME output_sync/ --exclude asn-manifest.json --exclude clean-manifest.json
     ./placeholder.py  # should read in the files and compile them into a new master list and write it to updated/
     aws2 s3 cp updated/MASTER.csv s3://$BUCKET_NAME
@@ -227,4 +227,4 @@ while:
 
 
     #do we ever have a case where we need to break out of this? error handling?
-  done
+done

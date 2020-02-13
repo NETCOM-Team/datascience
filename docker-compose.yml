@@ -20,5 +20,10 @@ services:
     image: redis:3.2-alpine
     volumes:
       - redis_data:/data
+
+  nginx:
+    image: nginx:latest
+    ports:
+     - "80:80"
 volumes:  
   redis_data:
