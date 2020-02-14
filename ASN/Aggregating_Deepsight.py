@@ -15,6 +15,7 @@ def creating_files(inputPath, outputPath):
     print("Creating Files")
 #    inputPath = 'Data/'
 #    outputPath = 'Data/Output/'
+    master_output = '/MASTER.csv'
     ipFileNames = "Deepsight IP"
     urlFileNames = "Deepsight URL"
     ipFiles = []
@@ -77,7 +78,7 @@ def creating_files(inputPath, outputPath):
     urlMaster_df.rename(columns=urlNamesDict, inplace=True)
     total_master = pd.concat([ipMaster_df,urlMaster_df], axis=0, ignore_index=True, sort=False)
     total_master = dropping_multiple_ips_asns(total_master)
-    total_master.to_csv(outputPath + '/MASTER.csv')
+    total_master.to_csv(outputPath + master_output)
 
 #Getting the files that match a naming convention
 def get_files(inputPath, fileNames):
