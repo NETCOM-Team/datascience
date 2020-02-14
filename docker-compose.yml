@@ -1,0 +1,30 @@
+version: '3.6'  
+services:  
+  app:
+    build: .
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+        BUCKET_NAME: ${BUCKET_NAME}
+        REGION: "${REGION}"
+        ACCOUNT_ID: "${ACCOUNT_ID}"
+        aws_access_key_id: "${aws_access_key_id}"
+        aws_secret_access_key: "${aws_secret_access_key}" 
+         
+        REDIS_HOST: redis
+
+    ports:
+      - "5000:5000"
+  redis:
+    image: redis:latest
+    volumes:
+      - redis_data:/data
+
+  nginx:
+    image: nginx:latest
+    ports:
+     - "80:80"
+volumes:  
+  redis_data:
