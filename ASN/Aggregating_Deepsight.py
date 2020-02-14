@@ -11,10 +11,11 @@ import pandas as pd
 import os
 
 #Creating CSVs from Deepsight Data
-def creating_files():
+def creating_files(inputPath, outputPath):
     print("Creating Files")
-    inputPath = 'data/'
-    outputPath = 'output_initial/'
+#    inputPath = 'Data/'
+#    outputPath = 'Data/Output/'
+    master_output = '/MASTER.csv'
     ipFileNames = "Deepsight IP"
     urlFileNames = "Deepsight URL"
     ipFiles = []
@@ -71,12 +72,13 @@ def creating_files():
                        'xml.domain.reputationRating':'Reputation_Rating'}
     ipFiles = get_files(inputPath, ipFileNames)
     urlFiles = get_files(inputPath, urlFileNames)
-    ipMaster_df = create_ip_url_master_df(inputPath, outputPath, ipFiles, c_size, ip_data_fields, "IP_Master")     
-    urlMaster_df = create_ip_url_master_df(inputPath, outputPath, urlFiles, c_size, url_data_fields, "URL_Master")
+    ipMaster_df = create_ip_url_master_df(inputPath, outputPath, ipFiles, c_size, ip_data_fields, "/IP_Master")     
+    urlMaster_df = create_ip_url_master_df(inputPath, outputPath, urlFiles, c_size, url_data_fields, "/URL_Master")
     ipMaster_df.rename(columns=ipNamesDict, inplace=True)
     urlMaster_df.rename(columns=urlNamesDict, inplace=True)
     total_master = pd.concat([ipMaster_df,urlMaster_df], axis=0, ignore_index=True, sort=False)
-    total_master.to_csv(outputPath + 'MASTER.csv')
+    total_master = dropping_multiple_ips_asns(total_master)
+    total_master.to_csv(outputPath + master_output)
 
 #Getting the files that match a naming convention
 def get_files(inputPath, fileNames):
@@ -96,8 +98,26 @@ def create_ip_url_master_df(inputPath, outputPath, files, c_size, data_fields, o
             df_chunk = pd.concat([df_chunk, chunk])
         
         df = pd.concat([df, df_chunk])
-        df_chunk.to_csv(outputPath + 'output_' + file)
+#        df_chunk.to_csv(outputPath + 'output_' + file)
     
-    df.to_csv(outputPath + 'output_' + outputName + '.csv')
+#    df.to_csv(outputPath + 'output_' + outputName + '.csv')
     return df
 
+#Getting rid of multiple IPs and ASNs
+def dropping_multiple_ips_asns(df):
+    print("Dropping multiple IPs and ASNs")
+    drop_set = set()
+    for x in range(len(df.index)):
+        if(str(df['IP_Address'][x]) == 'nan'):
+            drop_set.add(x)
+        elif(len(str(df['IP_Address'][x])) > 15):
+            drop_set.add(x)
+        elif(str(df['ASN'][x]) == 'nan'):
+            drop_set.add(x)
+        elif(len(str(df['ASN'][x])) > 12):
+            drop_set.add(x)
+    
+    df.drop(drop_set, inplace = True)
+    df['ASN'] = pd.to_numeric(df['ASN'], downcast='integer')
+    df.sort_values(by='ASN', inplace=True)
+    return df
