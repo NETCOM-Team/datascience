@@ -4,3 +4,4 @@ output/**
 credentials
 *.rdb
 .env
+.DS_Store
