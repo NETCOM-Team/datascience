@@ -15,7 +15,7 @@ def creating_ip_asn_lookups(inputPath, outputPath):
 #    asn_df = pd.read_csv("Data/Output/ASN_Scores.csv")
 #    create_whois_lookup(asn_df)
     create_geolite_lookup(inputPath, outputPath)
- 
+
 #Running whois commands to find IP/ASN mapping
 def create_whois_lookup(asn_df):
     print("Creating WHOIS")
@@ -27,7 +27,7 @@ def create_whois_lookup(asn_df):
     for index, row in asn_df.iterrows():
         total_ips = 0
         try:
-            ips = subprocess.check_output("whois -h whois.radb.net -- '-i origin AS" 
+            ips = subprocess.check_output("whois -h whois.radb.net -- '-i origin AS"
                             + str(row['ASN']) +
                             "'| grep -Eo '([0-9.]+){4}/[0-9]+'",
                             shell=True).decode("utf-8")
@@ -37,21 +37,21 @@ def create_whois_lookup(asn_df):
                     for y in ips:
                         try:
                             total_ips += ipaddress.ip_network(y).num_addresses
-                        except Exception as e: 
+                        except Exception as e:
                             print(e)
-                except Exception as e: 
+                except Exception as e:
                         print(e)
             else:
                 print("Not doing this")
-        except Exception as e: 
+        except Exception as e:
             print(e)
-            
+
         asn_list[int(row['ASN'])] = [int(row['ASN']), total_ips]
-    
+
     df = pd.DataFrame(asn_list, columns=['ASN', 'Total_IPs'])
     df.to_csv(whois_output_file)
- 
-#Creating Geolite csv to find IP/ASN mapping           
+
+#Creating Geolite csv to find IP/ASN mapping
 def create_geolite_lookup(inputPath, outputPath):
     print("Creating Geolite")
     geolite_input_file = inputPath + '/geolite.csv'
@@ -78,4 +78,3 @@ def create_geolite_lookup(inputPath, outputPath):
     asn_list[current_ASN] = [current_ASN, current_ip_total]
     df = pd.DataFrame(asn_list, columns=['ASN', 'Total_IPs'])
     df.to_csv(geolite_output_file)
-
