@@ -8,7 +8,6 @@ Created on Mon Feb  3 14:08:22 2020
 
 import pandas as pd
 import csv
-import argparse
 
 #Event class for each entry in Datafeed
 class Event:
@@ -50,6 +49,7 @@ class ASN:
         self.events_list = []
         self.score = 0
         self.total_ips = 0
+        self.badness = 0
 
     def __init__(self, as_number):
         try:
@@ -60,6 +60,7 @@ class ASN:
         self.events_list = []
         self.score = 0
         self.total_ips = 0
+        self.badness = 0
 
     def create_score(self):
         for x in self.events_list:
@@ -77,22 +78,18 @@ class ASN:
 
 
 # Creating ASN objects for all possible ASNS
-def creating_asns():
+def creating_asns(outputPath):
 
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--geolite', dest='geolite', help='geolite csv input file path')
-    parser.add_argument('--cleaned', dest='cleaned', help='cleaned CSV input file path')
-    parser.add_argument('--outfile', dest='outfile', help='output ASN/Score file path')
-
-    args = parser.parse_args()
-
+    asn_scores_output = outputPath + '/ASN_Scores.csv'
+    geolite_input = outputPath + '/geolite_lookup.csv'
+    master_input = outputPath + '/MASTER.csv'
     print("Creating ASN Objects")
     asn_objects = []
     MAX_RANGE = 600000
     for x in range(0,MAX_RANGE):
         asn_objects.append(ASN(x))
-    geolite_df = pd.read_csv(args.geolite)
-    master_df = pd.read_csv(args.cleaned, low_memory=False)
+    geolite_df = pd.read_csv(geolite_input)
+    master_df = pd.read_csv(master_input, low_memory=False)
     master_df.sort_values(by='ASN', inplace=True)
     for x in range(len(master_df.index)):
         temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
@@ -100,10 +97,10 @@ def creating_asns():
                            master_df['Reputation_Rating'][x])
         asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
 
-    with open(args.outfile, 'w') as file:
+    with open(asn_scores_output, 'w') as file:
 
        writer = csv.writer(file)
-       writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness'])
+       writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness', 'Exists'])
        for x in asn_objects:
            x.create_score()
            x.total_ips = geolite_df['Total_IPs'][x.as_number]
@@ -111,4 +108,6 @@ def creating_asns():
            if(x.total_ips > 0 or x.score > 0):
                x.set_total_ips()
                x.create_badness()
-               writer.writerow([x.as_number, x.score, x.total_ips, x.badness])
+               writer.writerow([x.as_number, x.score, x.total_ips, x.badness, True])
+           else:
+               writer.writerow([x.as_number, x.score, x.total_ips, x.badness, False])
