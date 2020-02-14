@@ -31,7 +31,7 @@ mkdir updated
 mkdir output_sync
 
 #copy all files from s3 data store to local directory
-aws2 s3 cp s3://$BUCKET_NAME data/ --recursive
+aws s3 cp s3://$BUCKET_NAME data/ --recursive
 echo "debug data from s3"
 ls data/
 
@@ -43,7 +43,7 @@ ls output_initial/
 
 #copy the file to the S3 bucket and QuickSight
 
-aws2 s3 cp output_initial/output_MASTER.csv s3://$BUCKET_NAME
+aws s3 cp output_initial/output_MASTER.csv s3://$BUCKET_NAME
 
 
 
@@ -135,15 +135,15 @@ cat > asn-manifest.json <<- EOF
 EOF
 
 #copy our manifest files into our s3 bucket
-aws2 s3 cp clean-manifest.json s3://$BUCKET_NAME
-aws2 s3 cp asn-manifest.json s3://$BUCKET_NAME
+aws s3 cp clean-manifest.json s3://$BUCKET_NAME
+aws s3 cp asn-manifest.json s3://$BUCKET_NAME
 
 #generates data-source for integration between quicksight and s3
 #connection.json should be built during docker-compose
-aws2 configure set REGION $REGION
+aws configure set REGION $REGION
 #create our data sources and save the ARN identifiers in their respective objects
-asn_ARN=$(aws2 quicksight create-data-source --cli-input-json file://asn-connection.json | grep "Arn" | awk '{print $2}' | sed 's/\"//g' | sed 's/,//')
-clean_ARN=$(aws2 quicksight create-data-source --cli-input-json file://clean-connection.json | grep "Arn" | awk '{print $2}' | sed 's/\"//g' | sed 's/,//')
+asn_ARN=$(aws quicksight create-data-source --cli-input-json file://asn-connection.json | grep "Arn" | awk '{print $2}' | sed 's/\"//g' | sed 's/,//')
+clean_ARN=$(aws quicksight create-data-source --cli-input-json file://clean-connection.json | grep "Arn" | awk '{print $2}' | sed 's/\"//g' | sed 's/,//')
 
 #BUILD tablemapping for create-data-set; specifies the schema and data types included in the CSV
 
@@ -157,7 +157,7 @@ cat > asn-tablemap <<- EOF
             "S3Source": {
                 "DataSourceArn": "$asn_ARN",
                 "UploadSettings": {
-                "Format": "XLSX",
+                "Format": "CSV",
                 "StartFromRow": 1,
                 "ContainsHeader": true,
                 "TextQualifier": "DOUBLE_QUOTE",
@@ -230,21 +230,21 @@ cat > clean-tablemap <<- EOF
 EOF
 
 #create the data sets
-aws2 quicksight create-data-set --cli-input-json file://asn-tablemap
-aws2 quicksight create-data-set --cli-input-json file://clean-tablemap
+aws quicksight create-data-set --cli-input-json file://asn-tablemap
+aws quicksight create-data-set --cli-input-json file://clean-tablemap
 
 # create quicksight dashboard from the exisiting template (query for dashboard/template arn?)
 
 #infinite loop to monitor the status of the s3 bucket and trigger quicksight updates upon changes
 #while true
 #do
-#    aws2 s3 sync s3://$BUCKET_NAME output_sync/ --exclude asn-manifest.json --exclude clean-manifest.json --recursive
+#    aws s3 sync s3://$BUCKET_NAME output_sync/ --exclude asn-manifest.json --exclude clean-manifest.json --recursive
 #    ./placeholder.py  # should read in the files and compile them into a new master list and write it to updated/
-#    aws2 s3 cp updated/MASTER.csv s3://$BUCKET_NAME
+#    aws s3 cp updated/MASTER.csv s3://$BUCKET_NAME
 
     #next 2 lines need testing for functionality before deployment, need to construct json inputs appropriately
-#    aws2 quicksight update-data-set --cli-input-json file://asn-update-tablemap
-#    aws2 quicksight update-data-set --cli-input-json file://clean-update-tablemap
+#    aws quicksight update-data-set --cli-input-json file://asn-update-tablemap
+#    aws quicksight update-data-set --cli-input-json file://clean-update-tablemap
 
 #    
 #    add a line to refresh the quicksight dashboard
