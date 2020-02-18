@@ -24,7 +24,7 @@ After making custom changes/alterations to the build images or scripts run:
 ```bash 
 docker-compose up --build
 ```
-To execute a build wihout relying on cached docker objects.  
+To execute a build without relying on cached docker objects.  
 
 
 # Functionality
