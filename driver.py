@@ -9,17 +9,19 @@ This is the driver file for the project
 
 import ASN
 import os
+import time
 
 def main():
-    inputPath = 'Data'
-    outputPath = 'Data/Output'
+    start_time = time.time()
+    inputPath = 'data'
+    outputPath = 'master'
     if not os.path.isdir(inputPath):
-        os.mkdir('Data')
+        os.mkdir(inputPath)
     if not os.path.isdir(outputPath):
-        os.mkdir('Data/Output')
+        os.mkdir(outputPath)
     ASN.Aggregating_Deepsight.creating_files(inputPath, outputPath)
-    #ASN.Cleaning_Master.cleaning_master()
 #    ASN.Creating_IP_ASNs.creating_ip_asn_lookups(inputPath, outputPath)
     ASN.Creating_ASN_Objs.creating_asns(outputPath)
+    print("--- %s seconds ---" % (time.time() - start_time))
     
 main()
