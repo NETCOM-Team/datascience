@@ -66,21 +66,24 @@ class ASN:
             self.as_number = 'Undefined'
         self.events_list = []
         self.score = 0
-        self.total_ips = 0
+        self.total_ips = False
         self.badness = 0
         self.has_events = False
         self.ev_centrality = 0
         self.katz_centrality = 0
 
     def create_score(self):
+        temp_score = 0
         for x in self.events_list:
             try:
-                self.score += x.score
+                temp_score += x.score
             except Exception as e:
                 print(e)
-
+                
+        self.score = temp_score
+        
     def set_total_ips (self):
-        if(self.total_ips == 0):
+        if(self.total_ips == False):
             self.total_ips = 256
 
     def create_badness(self):
@@ -132,14 +135,27 @@ def creating_asns(outputPath):
         asn_objects.append(ASN(x))
     geolite_df = pd.read_csv(geolite_input)
     master_df = pd.read_csv(master_input, low_memory=False)
-    master_df.sort_values(by='ASN', inplace=True)
+    master_df.sort_values(by=['ASN','Source_Date'], inplace=True)
+    asn_chrono_score_list = []
+    event_score = []
     for x in range(len(master_df.index)):
+        as_number = master_df['ASN'][x]
         temp_event = Event(master_df['ID'][x], master_df['IP_Address'][x],
                            master_df['Confidence'][x], master_df['Hostility'][x],
                            master_df['Reputation_Rating'][x])
-        asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
-        asn_objects[master_df['ASN'][x]].has_events = True
+        asn_objects[as_number].events_list.append(temp_event)
+        event_score.append(temp_event.create_score())
+        if(asn_objects[as_number].total_ips == False):
+            asn_objects[as_number].total_ips = geolite_df['Total_IPs'][asn_objects[as_number].as_number]
+            asn_objects[as_number].set_total_ips()
+        asn_objects[as_number].create_score()
+        asn_objects[as_number].create_badness()
+        asn_chrono_score_list.append(asn_objects[as_number].badness)
+#        asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
+        asn_objects[as_number].has_events = True
 
+    
+    
     for obj in asn_objects:
         if obj.has_events:
             event_objects.append(obj)
@@ -159,17 +175,16 @@ def creating_asns(outputPath):
 
     #print(asn_objects[0].as_number, asn_objects[0].ev_centrality)
 
+        
+    master_df['Event_Score'] = event_score
+    master_df['Historical_Score'] = asn_chrono_score_list
+    master_df.to_csv(master_input)
     with open(asn_scores_output, 'w') as file:
-
        writer = csv.writer(file)
        writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness', 'Exists', 'EV Centrality'])
        for x in asn_objects:
-           x.create_score()
-           x.total_ips = geolite_df['Total_IPs'][x.as_number]
-#           print(x.max_ips)
+           
            if(x.total_ips > 0 or x.score > 0):
-               x.set_total_ips()
-               x.create_badness()
                writer.writerow([x.as_number, x.score, x.total_ips, x.badness, True, x.ev_centrality])
            else:
-               writer.writerow([x.as_number, x.score, x.total_ips, x.badness, True, x.ev_centrality])
+               writer.writerow([x.as_number, x.score, x.total_ips, x.badness, False, x.ev_centrality])

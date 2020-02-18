@@ -9,7 +9,9 @@ This is a temporary script file.
 
 import pandas as pd
 import os
-
+import ipaddress
+import pickle
+#from netaddr import CIDR, IP
 #Creating CSVs from Deepsight Data
 def creating_files(inputPath, outputPath):
     print("Creating Files")
@@ -77,7 +79,7 @@ def creating_files(inputPath, outputPath):
     ipMaster_df.rename(columns=ipNamesDict, inplace=True)
     urlMaster_df.rename(columns=urlNamesDict, inplace=True)
     total_master = pd.concat([ipMaster_df,urlMaster_df], axis=0, ignore_index=True, sort=False)
-    total_master = dropping_multiple_ips_asns(total_master)
+    total_master = dropping_multiple_ips_asns(inputPath, total_master)
     total_master.to_csv(outputPath + master_output)
 
 #Getting the files that match a naming convention
@@ -104,13 +106,25 @@ def create_ip_url_master_df(inputPath, outputPath, files, c_size, data_fields, o
     return df
 
 #Getting rid of multiple IPs and ASNs
-def dropping_multiple_ips_asns(df):
+def dropping_multiple_ips_asns(inputPath, df):
     print("Dropping multiple IPs and ASNs")
+#    geoPath = inputPath + '/geolite3.csv'
+#    geo_df = pd.read_csv(geoPath)
+#    with open(inputPath + '/cached_list.txt', "rb") as fp:   # Unpickling
+#        cached_list = pickle.load(fp)
+#    cached_list = creating_cached_list(geo_df, inputPath)
+#    print(cached_list)
+#    for x in cached_list:
+#        for y in x:
+#            print(y)
+#    exit()
     drop_set = set()
+    print('Looping through dataframe')
     for x in range(len(df.index)):
         if(str(df['IP_Address'][x]) == 'nan'):
             drop_set.add(x)
         elif(len(str(df['IP_Address'][x])) > 15):
+#            cleaning_multiple_ips(df['IP_Address'][x], geo_df, cached_list)
             drop_set.add(x)
         elif(str(df['ASN'][x]) == 'nan'):
             drop_set.add(x)
@@ -119,5 +133,72 @@ def dropping_multiple_ips_asns(df):
 
     df.drop(drop_set, inplace = True)
     df['ASN'] = pd.to_numeric(df['ASN'], downcast='integer')
-    df.sort_values(by='ASN', inplace=True)
+    df.sort_values(by=['ASN','Source_Date'], inplace=True)
     return df
+
+def cleaning_multiple_ips(ips, geo_df, cached_list):
+    print('Cleaning Multiple Ips')
+    ips = ips.split(',')
+    for x in range(len(ips)):
+        asn = find_ip_asn(ips[x], geo_df, cached_list)
+        print('This is the ASN: ', asn)
+        ips[x] = [ips[x], asn]
+    print(ips)
+    return ips
+        
+def find_ip_asn(ip, geo_df, cached_list):
+    print('Find IP ASN')
+    temp = ip.split('.')
+    for x in range(0,4):
+            temp[x] = int(temp[x])
+    print('This is x: ', temp[0], type(temp[0]))
+    print('This is IP: ', ip)
+    try:
+        start = cached_list[temp[0]-1][temp[1]-1]
+        end = cached_list[temp[0]][temp[1]]
+    except:
+        print('Error This is x: ', x)
+        return
+    
+    print('Start and End', start,end)
+    
+#    exit()
+    for x in range(start, end):
+        print("In Start End loop")
+#        for index, row in geo_df.iterrows():
+        print(geo_df['IP_CIDR'][x])
+        print(ipaddress.ip_address(ip))
+        if(ipaddress.ip_address(ip) in ipaddress.ip_network(geo_df['IP_CIDR'][x])):
+            print("THIS IS HIT\n\n\n")
+            exit()
+            return geo_df['ASN'][x]
+    return -1        
+
+def creating_cached_list(geo_df, inputPath):
+    print("Creating Cached List")
+    cl0 = [0] * 256
+    cl1 = [0] * 256
+    cl2 = [0] * 256
+    current_ip = [0,0,0]
+    for index, row in geo_df.iterrows():
+        temp = row['IP_List'].strip('][').split(', ')
+        for x in range(0,4):
+            temp[x] = int(temp[x])
+#        print("row['IP_List']", row['IP_List'], type(row['IP_List']))
+#        print(temp, type(temp))
+#        print(current_ip[0], current_ip[1], current_ip[2])
+        if(current_ip[0] != temp[0]):
+            cl0[current_ip[0]] = cl1
+            current_ip[0] = temp[0]
+            cl1[current_ip[1]] = index
+            current_ip[1] = temp[1]
+        elif(current_ip[1] != temp[1]):
+            cl1[current_ip[1]] = index
+            current_ip[1] = temp[1]
+           
+            
+    cached_list = cl0
+    with open(inputPath + '/cached_list.txt', "wb") as fp:   #Pickling
+        pickle.dump(cached_list, fp)
+    return cached_list
+        
