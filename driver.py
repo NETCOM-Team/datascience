@@ -12,8 +12,8 @@ import ASN
 import os
 
 def main():
-    inputPath = 'Data'
-    outputPath = 'Data/output'
+    inputPath = 'data/'
+    outputPath = 'master/'
     if not os.path.isdir(inputPath):
         os.mkdir('Data')
     if not os.path.isdir(outputPath):
