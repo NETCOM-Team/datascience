@@ -22,9 +22,5 @@ services:
     volumes:
       - redis_data:/data
 
-  nginx:
-    image: nginx:latest
-    ports:
-     - "80:80"
 volumes:  
   redis_data:
