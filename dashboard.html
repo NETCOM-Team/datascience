@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+    <html>
+ 
+    <head>
+        <title>Basic Embed</title>
+<script src = "https://unpkg.com/amazon-quicksight-embedding-sdk@1.0.6/dist/quicksight-embedding-js-sdk.min.js"> </script>  
+<script src = "https://sdk.amazonaws.com/js/aws-sdk-2.619.0.min.js"> </script> <script type = "text/javascript">
+
+    function generateURL() {
+        console.log("inside gen url")
+
+        let awsCredentials = {
+            region: "us-east-1",
+            accessKeyId: "AKIAWPAOAHW3DUJ5JTM3",
+            secretAccessKey: "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"
+        };
+        console.log(awsCredentials)
+        AWS.config.update(awsCredentials);
+        console.log("set initial credentials")
+
+
+        var params = {
+            RoleArn: 'arn:aws:iam::444558491062:role/QuickSightEmbed',
+            RoleSessionName: 'QSViewer',
+            DurationSeconds: '3600',
+            ExternalId: 'abcd12345678'
+        };
+        console.log(params)
+
+        var sts = new AWS.STS();
+        console.log(sts)
+
+        sts.assumeRole(params, function(err, data) {
+            if (err) console.log(err, err.stack); // an error occurred
+            else userRegistration(data.Credentials);
+        }); // successful response
+    };
+        function userRegistration(response) {
+
+            tempCreds = {
+                region: "us-east-1",
+                accessKeyId: response.AccessKeyId,
+                secretAccessKey: response.SecretAccessKey,
+                sessionToken: response.SessionToken
+            }
+
+            AWS.config.update(tempCreds)
+            console.log("updated credentials temp")
+            var quicksight = new AWS.QuickSight();
+            var random_userName = "QSViewer" + Math.floor(Math.random() * 10);
+			console.log(random_userName);
+            params = {
+                AwsAccountId: "444558491062",
+                Email: "rob.mccarthy31@gmail.com",
+                IdentityType: "IAM",
+                Namespace: "default",
+                UserRole: "READER",
+                IamArn: "arn:aws:iam::444558491062:role/QuickSightEmbed",
+                SessionName: random_userName
+            };
+
+            quicksight.registerUser(params, function(err, data) {
+                    findDashboard(data.User)
+                    });
+            };
+
+            console.log("registered random user")
+
+
+            function findDashboard(user_info) {
+                params = {
+                    AwsAccountId: "444558491062",
+                    DashboardId: "53edbf87-8f21-47db-aa8b-c292ddf72e11",
+                    IdentityType: "QUICKSIGHT",
+                    ResetDisabled: true,
+                    UserArn: response.User.Arn,
+                    SessionLifetimeInMinutes: "15",
+                    UndoRedoDisabled: true
+                }
+
+                quicksight.getDashboardEmbedUrl(params, function(err, data) {
+                    urlParse(data)
+                });
+            };
+
+
+            function urlParse(response) {
+                console.log("got embedded dash")
+
+                embed_url = response.EmbedUrl;
+                console.log(embed_url)
+                embedDashboard(embed_url);
+
+            };
+
+
+
+
+            var dashboard
+
+            function onDashboardLoad(payload) {
+                console.log("Do something when the dashboard is fully loaded.");
+            }
+
+            function onError(payload) {
+                console.log("Do something when the dashboard fails loading");
+            }
+
+            function embedDashboard(URL) {
+                var containerDiv = document.getElementById("dashboardContainer");
+                var options = {
+                    url: URL,
+                    container: containerDiv,
+                    parameters: {
+                        country: "United States"
+                    },
+                    scrolling: "no",
+                    height: "700px",
+                    width: "1000px",
+                    locale: "en-US"
+                };
+                dashboard = QuickSightEmbedding.embedDashboard(options);
+                dashboard.on("error", onError);
+                dashboard.on("load", onDashboardLoad);
+            };
+
+            function onCountryChange(obj) {
+                dashboard.setParameters({
+                    country: obj.value})}; 
+    </script>   
+    </head>
+ 
+    <body onload="generateURL()">
+        <span>
+            <label for="country">Country</label>
+            <select id="country" name="country" onchange="onCountryChange(this)">
+                <option value="United States">United States</option>
+                <option value="Mexico">Mexico</option>
+                <option value="Canada">Canada</option>
+            </select>
+        </span>
+        <div id="dashboardContainer"></div>
+    </body>
+ 
+    </html>
+
