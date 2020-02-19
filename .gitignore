@@ -1,6 +1,7 @@
 data/**
 output/**
 *.csv
+!geolite.csv
 credentials
 *.rdb
 .env
