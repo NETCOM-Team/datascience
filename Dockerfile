@@ -1,14 +1,13 @@
 FROM python:latest
 LABEL maintainer="rmccarth@andrew.cmu.edu"
 
-RUN mkdir ASN
+RUN mkdir ASN && mkdir data && mkdir master
 
+COPY ["./geolite.csv", "data/"]
 COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["ASN", "ASN/"]
 COPY ["./requirements.txt", "${APPROOT}"]
-
-RUN cat requirements.txt
 
 RUN pip3 install --upgrade setuptools pip
 RUN pip3 install -r requirements.txt
