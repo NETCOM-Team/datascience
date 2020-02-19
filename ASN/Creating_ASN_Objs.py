@@ -79,9 +79,9 @@ class ASN:
                 temp_score += x.score
             except Exception as e:
                 print(e)
-                
+
         self.score = temp_score
-        
+
     def set_total_ips (self):
         if(self.total_ips == False):
             self.total_ips = 256
@@ -154,8 +154,8 @@ def creating_asns(outputPath):
 #        asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
         asn_objects[as_number].has_events = True
 
-    
-    
+
+
     for obj in asn_objects:
         if obj.has_events:
             event_objects.append(obj)
@@ -175,7 +175,7 @@ def creating_asns(outputPath):
 
     #print(asn_objects[0].as_number, asn_objects[0].ev_centrality)
 
-        
+
     master_df['Event_Score'] = event_score
     master_df['Historical_Score'] = asn_chrono_score_list
     master_df.to_csv(master_input)
@@ -183,7 +183,7 @@ def creating_asns(outputPath):
        writer = csv.writer(file)
        writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness', 'Exists', 'EV Centrality'])
        for x in asn_objects:
-           
+
            if(x.total_ips > 0 or x.score > 0):
                writer.writerow([x.as_number, x.score, x.total_ips, x.badness, True, x.ev_centrality])
            else:
