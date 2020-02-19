@@ -1,4 +1,5 @@
 FROM python:latest
+ENV PYTHONUNBUFFERED 0
 LABEL maintainer="rmccarth@andrew.cmu.edu"
 
 RUN mkdir ASN && mkdir data && mkdir master
