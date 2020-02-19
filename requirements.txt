@@ -3,3 +3,4 @@ matplotlib
 ipaddress
 networkx
 scipy
+redis
