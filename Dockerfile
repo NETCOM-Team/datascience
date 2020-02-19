@@ -4,6 +4,7 @@ LABEL maintainer="rmccarth@andrew.cmu.edu"
 RUN mkdir ASN && mkdir data && mkdir master
 
 COPY ["./geolite.csv", "data/"]
+RUN echo "head" && head data/geolite.csv
 COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["ASN", "ASN/"]

@@ -21,6 +21,7 @@ aws configure set aws_secret_access_key $aws_secret_access_key
 #initially copy our s3 data to local
 aws s3 cp s3://$BUCKET_NAME data/  --recursive --exclude MASTER.csv
 ls -al data/
+ls -al master/
 
 ./driver.py
 

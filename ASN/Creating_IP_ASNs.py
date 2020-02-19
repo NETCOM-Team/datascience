@@ -53,9 +53,12 @@ def create_whois_lookup(asn_df):
 
 #Creating Geolite csv to find IP/ASN mapping
 def create_geolite_lookup(inputPath, outputPath):
+    print("test")
     print("Creating Geolite")
     geolite_input_file = inputPath + 'geolite.csv'
     geolite_output_file = outputPath + 'geolite_lookup.csv'
+    print(geolite_input_file)
+    print(geolite_output_file)
     geo_df = pd.read_csv(geolite_input_file)
     geo_df = geo_df.drop(geo_df.columns[[0, 1, 4]], axis=1)
     geo_df = geo_df[geo_df.ASN != '-']
