@@ -1,5 +1,9 @@
 FROM python:latest
 ENV PYTHONUNBUFFERED 0
+ENV BIND_PORT 5000
+ENV REDIS_HOST localhost
+ENV REDIS_PORT 6379
+EXPOSE $BIND_PORT
 LABEL maintainer="rmccarth@andrew.cmu.edu"
 
 RUN mkdir ASN && mkdir data && mkdir master
@@ -19,12 +23,8 @@ RUN curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o 
 
 RUN chmod a+x ${APPROOT}/${APP}
 RUN chmod +x s3-job.sh
-RUN chmod +x driver.py 
+RUN chmod +x driver.py
 RUN ls -al ${APPDATA}
 RUN ls -al ASN/
 
 ENTRYPOINT ["./s3-job.sh"]
-
-
-
-

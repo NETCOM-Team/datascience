@@ -14,6 +14,7 @@ import networkx as nx
 from networkx.algorithms import community
 import ast
 import redis
+import os
 #Event class for each entry in Datafeed
 class Event:
     def __init__(self,event_id, ip_address, confidence, hostility, reputation_rating):
@@ -125,7 +126,7 @@ def get_katz_centrality(centrality_struct):
 # Creating ASN objects for all possible ASNS
 def creating_asns(outputPath):
 
-    r = redis.Redis(host='localhost', port=5000, db=0)
+    r = redis.Redis(host=os.environ['REDIS_HOST'], port=os.environ['REDIS_PORT'])
     asn_scores_output = outputPath + '/ASN_Scores.csv'
     geolite_input = outputPath + '/geolite_lookup.csv'
     master_input = outputPath + '/MASTER.csv'
@@ -186,7 +187,6 @@ def creating_asns(outputPath):
        writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness', 'Exists', 'EV Centrality'])
        for x in asn_objects:
            r.set(x.as_number, x.score)
-           print(r.get(x.as_number))
            if(x.total_ips > 0 or x.score > 0):
                writer.writerow([x.as_number, x.score, x.total_ips, x.badness, True, x.ev_centrality])
            else:
