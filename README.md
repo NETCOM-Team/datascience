@@ -26,6 +26,22 @@ docker-compose up --build
 ```
 To execute a build without relying on cached docker objects.  
 
+## Django API
+
+The Django API currently runs outside of the container environment and targets the exposed 6379 port of Redis. The API can be launched by navigating to django/redis_demo/ and executing:  
+
+```bash
+source env/bin/activate
+```
+Which will launch a virtualenv containing the required packages. Next, navigate to django_redis_demo/ and execute:  
+
+```bash
+python manage.py runserver
+```
+Access the API by navigating to 127.0.0.1:8000/api/ in your browser or executing:  
+```bash
+curl 127.0.0.1:8000/api/
+```
 
 # Functionality
 
@@ -37,7 +53,7 @@ The environment generates key-value pairs of the format ASN:risk_score and store
 
 # Planned Development. 
 
-Plans for further development include deploying a Django API to provide query-capability to the ASN objects stored in Redis. 
+[Proof of Concept COMPLETED] Plans for further development include deploying a Django API to provide query-capability to the ASN objects stored in Redis. 
 
 Additional plans include the development of a console application which will allow technically-capable operators to generate on-the-fly descriptive metrics of the ASN threat-landscape described by the data indexed in Redis in quasi-realtime.  
 
