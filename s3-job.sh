@@ -14,7 +14,6 @@ aws s3 cp s3://$BUCKET_NAME data/  --recursive --exclude MASTER.csv
 ./driver.py
 
 aws s3 cp master/MASTER.csv s3://$BUCKET_NAME
-aws s3 cp master/ASN_Scores.csv s3://$BUCKET_NAME
 
 #infinite loop to monitor the status of the s3 bucket and trigger quicksight updates upon changes
 #while true;
