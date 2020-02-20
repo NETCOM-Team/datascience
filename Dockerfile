@@ -9,7 +9,6 @@ LABEL maintainer="rmccarth@andrew.cmu.edu"
 RUN mkdir ASN && mkdir data && mkdir master
 
 COPY ["./geolite.csv", "data/"]
-RUN echo "head" && head data/geolite.csv
 COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["ASN", "ASN/"]
@@ -24,7 +23,5 @@ RUN curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o 
 RUN chmod a+x ${APPROOT}/${APP}
 RUN chmod +x s3-job.sh
 RUN chmod +x driver.py
-RUN ls -al ${APPDATA}
-RUN ls -al ASN/
 
 ENTRYPOINT ["./s3-job.sh"]
