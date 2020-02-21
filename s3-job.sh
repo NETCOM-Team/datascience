@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #new s3-job.sh
 
