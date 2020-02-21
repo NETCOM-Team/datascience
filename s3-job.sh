@@ -26,7 +26,7 @@ aws s3 cp master/MASTER.csv s3://$BUCKET_NAME
 #    ./driver.py
 
     # upload MASTER.csv to our s3 bucket for use with quicksight. 
-    aws s3 cp master/MASTER.csv s3://$BUCKET_NAME
+#    aws s3 cp master/MASTER.csv s3://$BUCKET_NAME
 
 #  done
 
