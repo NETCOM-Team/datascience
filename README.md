@@ -14,8 +14,6 @@ Then run:
 docker-compose up
 ```
 
-To destroy the environment simply run:  
-
 ```bash
 docker-compose down
 ```
@@ -39,6 +37,7 @@ The API endpoint GET /api currently returns a JSON object of the first 100 ASN o
 ```bash
 curl 127.0.0.1:8000/api/ | jq .'4444'
 ```
+The API is further documented here: [Datascience API](https://github.com/cmunetcoms20/datascience/wiki/API)  
 
 # Functionality
 
