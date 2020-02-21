@@ -28,19 +28,16 @@ To execute a build without relying on cached docker objects.
 
 ## Django API
 
-The Django API currently runs outside of the container environment and targets the exposed 6379 port of Redis. The API can be launched by navigating to django/redis_demo/ and executing:  
-
-```bash
-source env/bin/activate
-```
-Which will launch a virtualenv containing the required packages. Next, navigate to django_redis_demo/ and execute:  
-
-```bash
-python manage.py runserver
+An API is now exposed to the host on port 8000 and included in the docker-compose environment. The API is still in development and requires further development. 
 ```
 Access the API by navigating to 127.0.0.1:8000/api/ in your browser or executing:  
 ```bash
 curl 127.0.0.1:8000/api/
+```
+The API endpoint GET /api currently returns a JSON object of the first 100 ASN objects and their respective risk scores. To query the score of a particular ASN:
+
+```bash
+curl 127.0.0.1:8000/api/ | jq .'4444'
 ```
 
 # Functionality
