@@ -1,9 +1,8 @@
 FROM python:latest
 ENV PYTHONUNBUFFERED 0
-ENV BIND_PORT 5000
 ENV REDIS_HOST localhost
 ENV REDIS_PORT 6379
-EXPOSE $BIND_PORT
+
 LABEL maintainer="rmccarth@andrew.cmu.edu"
 
 RUN mkdir ASN && mkdir data && mkdir master

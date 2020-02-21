@@ -40,8 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
 ]
-
-REDIS_HOST = '127.0.0.1'
+REDIS_HOST = 'redis'
 REDIS_PORT = 6379
 
 MIDDLEWARE = [
