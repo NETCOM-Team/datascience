@@ -24,4 +24,4 @@ RUN chmod a+x ${APPROOT}/${APP}
 RUN chmod +x s3-job.sh
 RUN chmod +x driver.py
 
-ENTRYPOINT ["./s3-job.sh"]
+ENTRYPOINT ["sh","/s3-job.sh"]
