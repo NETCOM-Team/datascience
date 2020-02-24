@@ -13,13 +13,14 @@ import os
 import time
 
 def main():
+    
     start_time = time.time()
-    inputPath = 'data/'
-    outputPath = 'master'
+    inputPath = 'data'
+    outputPath = 'data/Output'
     if not os.path.isdir(inputPath):
         os.mkdir(inputPath)
     if not os.path.isdir(outputPath):
-        os.mkdir('Data/output')
+        os.mkdir(outputPath)
     if not os.path.exists('master/geolite_lookup.csv'):
         ASN.Creating_IP_ASNs.create_geolite_lookup(inputPath, outputPath)
 

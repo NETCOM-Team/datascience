@@ -16,7 +16,13 @@ def main():
     inputPath = inputPath + '/geolite.csv'
     geo_df = pd.read_csv(inputPath)
     last_hosts_list = []
+    drop_set = set()
     print('A')
+    for x in range(len(geo_df.index)):
+        if(geo_df['ASN'][x] == '-'):
+            drop_set.add(x)
+        
+    geo_df.drop(drop_set, inplace = True) 
     for index, row in geo_df.iterrows():
 #        n = ipaddress.IPv4Network('10.10.128.0/17')
 #        first, last = n[0], n[-1]
