@@ -1,0 +1,297 @@
+The following steps outline the process of creating a QuickSight dataset from which to base a dashboard analysis:
+
+# assumptions
+- we have a dashboard template created from our dashboard (describe-dashboard, describe-analysis)
+- the client has an existing awsaccount id which allows access to quicksight (aka the client has enterprise quicksight)
+- the data schema is known and consistent
+- the quicksight instance is configured in the same region as the s3 bucket
+- the AWS IAM user account that is original, must have the permissions to register a user in quicksight and to
+assign permissions to entities in aws
+
+
+2. create-data-source
+
+# json format
+<details>
+  <summary>create-data-source</summary>
+
+## create-data-source
+
+```json
+{
+    "AwsAccountId": "",
+    "DataSourceId": "",
+    "Name": "",
+    "Type": "ATHENA",
+    "DataSourceParameters": {
+        "S3Parameters": {
+            "ManifestFileLocation": {
+                "Bucket": "",
+                "Key": ""
+            }
+        }
+    },
+    "Credentials": {
+        "CredentialPair": {
+            "Username": "",
+            "Password": ""
+        }
+    },
+    "Permissions": [
+    {
+        "Principal": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:user/default/alice",
+        "Actions": [
+            "quicksight:UpdateDataSourcePermissions",
+            "quicksight:DescribeDataSource",
+            "quicksight:DescribeDataSourcePermissions",
+            "quicksight:PassDataSource",
+            "quicksight:UpdateDataSource",
+            "quicksight:DeleteDataSource"
+
+        ]
+    }
+    ]
+}
+```
+</details>
+
+## returns
+
+```json
+{
+    "Status": 202,
+    "Arn": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:datasource/SampleRedshiftDatasouce",
+    "DataSourceId": "SampleRedshiftDatasouce",
+    "CreationStatus": "CREATION_IN_PROGRESS",
+    "RequestId": "ac9fb8fe-71d8-4005-a7c9-d66d814e224e"
+}
+```
+
+
+3. create-data-set
+
+## requirements
+- dataset schema
+
+
+# json format
+<details>
+  <summary>create-data-set</summary>
+
+## create-data-set
+
+```json
+{
+    "AwsAccountId": "",
+    "DataSetId": "",
+    "Name": "",
+    "PhysicalTableMap": {
+        "KeyName": {
+            "S3Source": {
+                "DataSourceArn": "",
+                "UploadSettings": {
+                    "Format": "JSON",
+                    "StartFromRow": 0,
+                    "ContainsHeader": true,
+                    "TextQualifier": "SINGLE_QUOTE",
+                    "Delimiter": ""
+                },
+                "InputColumns": [
+                    {
+                        "Name": "",
+                        "Type": "INTEGER"
+                    }
+                ]
+            }
+        }
+    },
+    "ImportMode": "SPICE",
+    "Permissions": [
+    {
+        "Principal": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:user/default/alice",
+        "Actions": [
+            "quicksight:UpdateDataSetPermissions",
+            "quicksight:DescribeDataSet",
+            "quicksight:DescribeDataSetPermissions",
+            "quicksight:PassDataSet",
+            "quicksight:DescribeIngestion",
+            "quicksight:ListIngestions",
+            "quicksight:UpdateDataSet",
+            "quicksight:DeleteDataSet",
+            "quicksight:CreateIngestion",
+            "quicksight:CancelIngestion"
+        ]
+    }
+    ]
+}
+```
+</details>
+
+## returns
+arn of the DataSetId
+dataset id
+ingestion Arn
+ingestion id
+RequestId
+Status
+
+4. create-template
+
+# requires
+
+source ARN identifier from previous create-data-source command
+dataset ARN identifier from previous create-data-set command
+a name to be assigned to the Template
+a templateid to be assigned to the templateid
+our AWS Account ID
+
+# JSON
+
+<details>
+  <summary>create-data-set</summary>
+
+## create-template
+
+```json
+{
+    "AwsAccountId": "xxxxxxxxxxxx",
+    "TemplateId": "DemoDashboardTemplate",
+    "Name": "Demo Dashboard Template",
+    "SourceEntity": {
+        "SourceAnalysis": {
+            "Arn": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:analysis/7975f7aa-261c-4e7c-b430-305d71e07a8e",
+            "DataSetReferences": [
+                {
+                    "DataSetPlaceholder": "DS1",
+                    "DataSetArn": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:dataset/DemoDataSet1"
+                }
+            ]
+        }
+    },
+    "VersionDescription": "1"
+}
+```
+</details>
+
+5. create-dashboard
+
+# JSON
+
+```json
+{
+    "AwsAccountId": "xxxxxxxxxxxx",
+    "DashboardId": "DemoDashboard1",
+    "Name": "Demo Dashboard 1",
+    "Permissions": [
+        {
+            "Principal": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:user/default/alice",
+            "Actions": [
+                "quicksight:DescribeDashboard",
+                "quicksight:ListDashboardVersions",
+                "quicksight:UpdateDashboardPermissions",
+                "quicksight:QueryDashboard",
+                "quicksight:UpdateDashboard",
+                "quicksight:DeleteDashboard",
+                "quicksight:DescribeDashboardPermissions",
+                "quicksight:UpdateDashboardPublishedVersion"
+            ]
+        }
+    ],
+    "SourceEntity": {
+        "SourceTemplate": {
+            "DataSetReferences": [
+                {
+                    "DataSetPlaceholder": "DS1",
+                    "DataSetArn": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:dataset/DemoDataSet2"
+                }
+            ],
+            "Arn": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:template/DemoDashboardTemplate"
+        }
+    },
+    "Tags": [
+        {
+            "Key": "Name",
+            "Value": "API-DemoDashboard"
+        }
+    ],
+    "VersionDescription": "1",
+    "DashboardPublishOptions": {
+        "AdHocFilteringOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "ExportToCSVOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "SheetControlsOption": {
+            "VisibilityState": "EXPANDED"
+        }
+    }
+}
+```
+
+6. update-data-set
+
+## requirements
+- dataset schema
+
+
+# json format
+<details>
+  <summary>create-data-set</summary>
+
+## create-data-set
+
+```json
+{
+    "AwsAccountId": "",
+    "DataSetId": "",
+    "Name": "",
+    "PhysicalTableMap": {
+        "KeyName": {
+            "S3Source": {
+                "DataSourceArn": "",
+                "UploadSettings": {
+                    "Format": "JSON",
+                    "StartFromRow": 0,
+                    "ContainsHeader": true,
+                    "TextQualifier": "SINGLE_QUOTE",
+                    "Delimiter": ""
+                },
+                "InputColumns": [
+                    {
+                        "Name": "",
+                        "Type": "INTEGER"
+                    }
+                ]
+            }
+        }
+    },
+    "ImportMode": "SPICE",
+    "Permissions": [
+    {
+        "Principal": "arn:aws:quicksight:us-east-1:xxxxxxxxxxxx:user/default/alice",
+        "Actions": [
+            "quicksight:UpdateDataSetPermissions",
+            "quicksight:DescribeDataSet",
+            "quicksight:DescribeDataSetPermissions",
+            "quicksight:PassDataSet",
+            "quicksight:DescribeIngestion",
+            "quicksight:ListIngestions",
+            "quicksight:UpdateDataSet",
+            "quicksight:DeleteDataSet",
+            "quicksight:CreateIngestion",
+            "quicksight:CancelIngestion"
+        ]
+    }
+    ]
+}
+```
+</details>
+
+## returns
+arn of the DataSetId
+dataset id
+ingestion Arn
+ingestion id
+RequestId
+Status
