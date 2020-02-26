@@ -21,6 +21,7 @@ def manage_items(request, *args, **kwargs):
 
     if request.method == 'GET' and request.path == "/ip":
         body = json.loads(request.body)
+        # resolve the ip's passed in the body to their respective asn's
         asnList = resolve_asn(body)
         response = getASNdetails(asnList)
 
@@ -29,11 +30,15 @@ def manage_items(request, *args, **kwargs):
 
 
 def resolve_asn(ipList):
+    # create an asnList to store our list of dictionarires retrieved from redis
     asnList = []
     for ip in ipList["ip"]:
+        # perform a whois lookup on each ip address to get its ASN; swap out once we have the appropriate .csv
         command = "whois -h whois.radb.net " + ip + "| grep 'origin:' | awk '{print $2}' | head -n 1 | cut -d 'S' -f 2"
-        asn = subprocess.check_output(command,shell=True).decode("utf-8")           
+        asn = subprocess.check_output(command,shell=True).decode("utf-8")
+        # strip off the newline that is appended to the subprocess command.           
         asn = asn.rstrip()
+        #create a list of these asn's so we can pass them to getASNdetails
         asnList.append(asn)
     
     return asnList
@@ -41,9 +46,12 @@ def resolve_asn(ipList):
 def getASNdetails(asnList):
     response_list = []
     for asn in asnList:
+        # redis returns a serialized json object
         serialized_asn = redis_instance.get(asn)
 
+        # if there is not an asn object for this asn it returns None
         if serialized_asn == None:
+            # create a dictionary to store our single asn object
             risk_dictionary = {}
             risk_dictionary[asn] = "no known score"
             response_list.append(risk_dictionary)         
