@@ -1,4 +1,5 @@
 import json
+import subprocess
 from django.conf import settings
 import redis
 from rest_framework.decorators import api_view
@@ -17,21 +18,42 @@ def manage_items(request, *args, **kwargs):
         body = json.loads(request.body)
         #retrieve the value from redis with the asn requested
         for asn in body["asn"]:
-            risk = redis_instance.get(asn)
+            serialized_asn = redis_instance.get(asn)
+            deserialized = json.loads(serialized_asn)
             risk_dictionary = {}
-            risk_dictionary["asn"] = asn
-            risk_dictionary["risk"] = risk
-            response_list.append(risk_dictionary)
-        
-       #{asns: [{"asn":asn,"risk":risk}, {"asn":asn,"risk":risk}]}
 
-        
-        
+            risk_dictionary[asn] = deserialized
+            response_list.append(risk_dictionary)
+
         response = {
             "asns" : response_list
         }
 
         return Response(response,200)
+
+    if request.method == 'GET' and request.path == "/ip":
+        response_list = []
+        body = json.loads(request.body)
+        for ip in body["ip"]:
+            command = "whois -h whois.radb.net " + ip + "| grep 'origin:' | awk '{print $2}' | head -n 1 | cut -d 'S' -f 2"
+            asn = subprocess.check_output(command,shell=True).decode("utf-8")           
+            asn = asn.rstrip()
+            serialized_asn = redis_instance.get(asn)
+            if serialized_asn == None:
+                risk_dictionary = {}
+                risk_dictionary[asn] = "no known score"
+                response_list.append(risk_dictionary)
+            else:
+                deserialized = json.loads(serialized_asn)
+                risk_dictionary = {}
+                risk_dictionary[asn] = deserialized
+                response_list.append(risk_dictionary)
+
+            response = {
+                "ips": response_list
+            }
+
+            return Response(response,200)
 
         # items = {}
         # count = 0
@@ -61,58 +83,58 @@ def manage_items(request, *args, **kwargs):
 
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def manage_item(request, *args, **kwargs):
-    if request.method == 'GET':
-        if kwargs['key']:
-            value = redis_instance.get(kwargs['key'])
-            if value:
-                response = {
-                    'key': kwargs['key'],
-                    'value': value,
-                    'msg': 'success'
-                }
-                return Response(response, status=200)
-            else:
-                response = {
-                    'key': kwargs['key'],
-                    'value': None,
-                    'msg': 'Not found'
-                }
-                return Response(response, status=404)
-    elif request.method == 'PUT':
-        if kwargs['key']:
-            request_data = json.loads(request.body)
-            new_value = request_data['new_value']
-            value = redis_instance.get(kwargs['key'])
-            if value:
-                redis_instance.set(kwargs['key'], new_value)
-                response = {
-                    'key': kwargs['key'],
-                    'value': value,
-                    'msg': f"Successfully updated {kwargs['key']}"
-                }
-                return Response(response, status=200)
-            else:
-                response = {
-                    'key': kwargs['key'],
-                    'value': None,
-                    'msg': 'Not found'
-                }
-                return Response(response, status=404)
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def manage_item(request, *args, **kwargs):
+#     if request.method == 'GET':
+#         if kwargs['key']:
+#             value = redis_instance.get(kwargs['key'])
+#             if value:
+#                 response = {
+#                     'key': kwargs['key'],
+#                     'value': value,
+#                     'msg': 'success'
+#                 }
+#                 return Response(response, status=200)
+#             else:
+#                 response = {
+#                     'key': kwargs['key'],
+#                     'value': None,
+#                     'msg': 'Not found'
+#                 }
+#                 return Response(response, status=404)
+#     elif request.method == 'PUT':
+#         if kwargs['key']:
+#             request_data = json.loads(request.body)
+#             new_value = request_data['new_value']
+#             value = redis_instance.get(kwargs['key'])
+#             if value:
+#                 redis_instance.set(kwargs['key'], new_value)
+#                 response = {
+#                     'key': kwargs['key'],
+#                     'value': value,
+#                     'msg': f"Successfully updated {kwargs['key']}"
+#                 }
+#                 return Response(response, status=200)
+#             else:
+#                 response = {
+#                     'key': kwargs['key'],
+#                     'value': None,
+#                     'msg': 'Not found'
+#                 }
+#                 return Response(response, status=404)
 
-    elif request.method == 'DELETE':
-        if kwargs['key']:
-            result = redis_instance.delete(kwargs['key'])
-            if result == 1:
-                response = {
-                    'msg': f"{kwargs['key']} successfully deleted"
-                }
-                return Response(response, status=404)
-            else:
-                response = {
-                    'key': kwargs['key'],
-                    'value': None,
-                    'msg': 'Not found'
-                }
-                return Response(response, status=404)
+#     elif request.method == 'DELETE':
+#         if kwargs['key']:
+#             result = redis_instance.delete(kwargs['key'])
+#             if result == 1:
+#                 response = {
+#                     'msg': f"{kwargs['key']} successfully deleted"
+#                 }
+#                 return Response(response, status=404)
+#             else:
+#                 response = {
+#                     'key': kwargs['key'],
+#                     'value': None,
+#                     'msg': 'Not found'
+#                 }
+#                 return Response(response, status=404)
