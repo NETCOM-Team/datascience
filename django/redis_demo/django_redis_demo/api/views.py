@@ -12,48 +12,58 @@ redis_instance = redis.StrictRedis(host=settings.REDIS_HOST,port=settings.REDIS_
 @api_view(['GET', 'POST'])
 def manage_items(request, *args, **kwargs):
     if request.method == 'GET' and request.path=="/asn":
-        response_list = []
-        
         #get the body of the json-submitted request
         body = json.loads(request.body)
         #retrieve the value from redis with the asn requested
-        for asn in body["asn"]:
-            serialized_asn = redis_instance.get(asn)
-            deserialized = json.loads(serialized_asn)
-            risk_dictionary = {}
-
-            risk_dictionary[asn] = deserialized
-            response_list.append(risk_dictionary)
-
-        response = {
-            "asns" : response_list
-        }
+        response = getASNdetails(body["asn"])
 
         return Response(response,200)
 
     if request.method == 'GET' and request.path == "/ip":
-        response_list = []
         body = json.loads(request.body)
-        for ip in body["ip"]:
-            command = "whois -h whois.radb.net " + ip + "| grep 'origin:' | awk '{print $2}' | head -n 1 | cut -d 'S' -f 2"
-            asn = subprocess.check_output(command,shell=True).decode("utf-8")           
-            asn = asn.rstrip()
-            serialized_asn = redis_instance.get(asn)
-            if serialized_asn == None:
-                risk_dictionary = {}
-                risk_dictionary[asn] = "no known score"
-                response_list.append(risk_dictionary)
-            else:
-                deserialized = json.loads(serialized_asn)
-                risk_dictionary = {}
-                risk_dictionary[asn] = deserialized
-                response_list.append(risk_dictionary)
+        asnList = resolve_asn(body)
+        response = getASNdetails(asnList)
 
-            response = {
-                "ips": response_list
-            }
+        return Response(response,200)
 
-            return Response(response,200)
+
+
+def resolve_asn(ipList):
+    asnList = []
+    for ip in ipList["ip"]:
+        command = "whois -h whois.radb.net " + ip + "| grep 'origin:' | awk '{print $2}' | head -n 1 | cut -d 'S' -f 2"
+        asn = subprocess.check_output(command,shell=True).decode("utf-8")           
+        asn = asn.rstrip()
+        asnList.append(asn)
+    
+    return asnList
+
+def getASNdetails(asnList):
+    response_list = []
+    for asn in asnList:
+        serialized_asn = redis_instance.get(asn)
+
+        if serialized_asn == None:
+            risk_dictionary = {}
+            risk_dictionary[asn] = "no known score"
+            response_list.append(risk_dictionary)         
+        else:
+            deserialized = json.loads(serialized_asn)
+            risk_dictionary = {}
+            risk_dictionary[asn] = deserialized
+            response_list.append(risk_dictionary)
+
+    response = {
+            "asns" : response_list
+    }
+
+    return response
+
+
+
+
+
+
 
         # items = {}
         # count = 0
