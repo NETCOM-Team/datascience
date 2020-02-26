@@ -21,25 +21,32 @@ def manage_items(request, *args, **kwargs):
 
     if request.method == 'GET' and request.path == "/ip":
         body = json.loads(request.body)
-        # resolve the ip's passed in the body to their respective asn's
-        asnList = resolve_asn(body)
-        response = getASNdetails(asnList)
-
+        response = {}
+        
+        for ip in body["ip"]:
+            asn = resolve_asn(ip)
+            # resolve the ip's passed in the body to their respective asn's
+            asn_object = getASNdetails(asn)
+            print(asn_object)
+            response[ip] = asn_object
+        
+        print(response)        
         return Response(response,200)
 
 
 
-def resolve_asn(ipList):
+def resolve_asn(ip):
+    print(ip)
     # create an asnList to store our list of dictionarires retrieved from redis
     asnList = []
-    for ip in ipList["ip"]:
-        # perform a whois lookup on each ip address to get its ASN; swap out once we have the appropriate .csv
-        command = "whois -h whois.radb.net " + ip + "| grep 'origin:' | awk '{print $2}' | head -n 1 | cut -d 'S' -f 2"
-        asn = subprocess.check_output(command,shell=True).decode("utf-8")
-        # strip off the newline that is appended to the subprocess command.           
-        asn = asn.rstrip()
-        #create a list of these asn's so we can pass them to getASNdetails
-        asnList.append(asn)
+
+    # perform a whois lookup on each ip address to get its ASN; swap out once we have the appropriate .csv
+    command = "whois -h whois.radb.net " + ip + "| grep 'origin:' | awk '{print $2}' | head -n 1 | cut -d 'S' -f 2"
+    asn = subprocess.check_output(command,shell=True).decode("utf-8")
+    # strip off the newline that is appended to the subprocess command.           
+    asn = asn.rstrip()
+    #create a list of these asn's so we can pass them to getASNdetails
+    asnList.append(asn)
     
     return asnList
 
