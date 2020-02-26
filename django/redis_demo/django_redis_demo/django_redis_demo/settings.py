@@ -40,8 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
 ]
-REDIS_HOST = 'redis'
-REDIS_PORT = 6379
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,6 +83,8 @@ DATABASES = {
     }
 }
 
+REDIS_HOST = 'redis'
+REDIS_PORT = 6379
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
