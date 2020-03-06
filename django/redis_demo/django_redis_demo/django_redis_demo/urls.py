@@ -1,5 +1,6 @@
 from django.urls import path, include
 
 urlpatterns = [
-    path('api/', include('api.urls')),
+    path('asn', include('api.urls')),
+    path('ip', include('api.urls')),
 ]
