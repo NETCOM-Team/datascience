@@ -26,18 +26,28 @@ To execute a build without relying on cached docker objects.
 
 ## Django API
 
-An API is now exposed to the host on port 8000 and included in the docker-compose environment. The API is still in development and requires further development. 
-```
-Access the API by navigating to 127.0.0.1:8000/api/ in your browser or executing:  
-```bash
-curl 127.0.0.1:8000/api/
-```
-The API endpoint GET /api currently returns a JSON object of the first 100 ASN objects and their respective risk scores. To query the score of a particular ASN:
+An API is now exposed to the host on port 8000 and included in the docker-compose environment. The API provides a number of endpoints to aid analysts in queries for ASNs or IPs of interest e.g.  
 
-```bash
-curl 127.0.0.1:8000/api/ | jq .'4444'
+```json
+GET /asn
+
+body:
+{
+	"asn":["17054"]
+}
+
+response:  
+
+{
+    "asns": [
+        {
+            "17054": 76.83333333333336
+        }
+    ]
+}
 ```
-The API is further documented here: [Datascience API](https://github.com/cmunetcoms20/datascience/wiki/API)  
+
+The API is documented here: [Datascience API](https://github.com/cmunetcoms20/datascience/wiki/API)  
 
 # Functionality
 

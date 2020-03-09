@@ -25,7 +25,7 @@ SECRET_KEY = 'ml=@iw5sz7&yl7x#po%e(26tv%^+v5lsqj*f7-@+-9gd&9v5=j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -40,8 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
 ]
-REDIS_HOST = 'redis'
-REDIS_PORT = 6379
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,6 +83,8 @@ DATABASES = {
     }
 }
 
+REDIS_HOST = 'redis'
+REDIS_PORT = 6379
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
