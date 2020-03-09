@@ -1,5 +1,16 @@
-version: '3.6'  
-services:  
+version: '3.6'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: django/redis_demo/django_redis_demo/Dockerfile
+    command: bash -c "python django/redis_demo/django_redis_demo/manage.py makemigrations && python django/redis_demo/django_redis_demo/manage.py migrate && python django/redis_demo/django_redis_demo/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
   app:
     build: .
     depends_on:
@@ -9,18 +20,14 @@ services:
     environment:
         BUCKET_NAME: ${BUCKET_NAME}
         REGION: "${REGION}"
-        ACCOUNT_ID: "${ACCOUNT_ID}"
         aws_access_key_id: "${aws_access_key_id}"
-        aws_secret_access_key: "${aws_secret_access_key}" 
-         
+        aws_secret_access_key: "${aws_secret_access_key}"
         REDIS_HOST: redis
-
-    ports:
-      - "5000:5000"
   redis:
     image: redis:latest
     volumes:
       - redis_data:/data
-
-volumes:  
+    ports:
+      - "6379:6379"
+volumes:
   redis_data:

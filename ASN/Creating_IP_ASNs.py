@@ -56,6 +56,8 @@ def create_geolite_lookup(inputPath, outputPath):
     print("Creating Geolite Whois")
     geolite_input_file = inputPath + 'geolite.csv'
     geolite_output_file = outputPath + 'geolite_lookup.csv'
+    print(geolite_input_file)
+    print(geolite_output_file)
     geo_df = pd.read_csv(geolite_input_file)
     geo_df = geo_df.drop(geo_df.columns[[0, 1, 4]], axis=1)
     geo_df = geo_df[geo_df.ASN != '-']

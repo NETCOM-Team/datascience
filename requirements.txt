@@ -2,3 +2,5 @@ pandas
 matplotlib
 ipaddress
 networkx
+scipy
+redis

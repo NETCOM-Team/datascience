@@ -14,8 +14,6 @@ Then run:
 docker-compose up
 ```
 
-To destroy the environment simply run:  
-
 ```bash
 docker-compose down
 ```
@@ -26,6 +24,30 @@ docker-compose up --build
 ```
 To execute a build without relying on cached docker objects.  
 
+## Django API
+
+An API is now exposed to the host on port 8000 and included in the docker-compose environment. The API provides a number of endpoints to aid analysts in queries for ASNs or IPs of interest e.g.  
+
+```json
+GET /asn
+
+body:
+{
+	"asn":["17054"]
+}
+
+response:  
+
+{
+    "asns": [
+        {
+            "17054": 76.83333333333336
+        }
+    ]
+}
+```
+
+The API is documented here: [Datascience API](https://github.com/cmunetcoms20/datascience/wiki/API)  
 
 # Functionality
 
@@ -37,7 +59,7 @@ The environment generates key-value pairs of the format ASN:risk_score and store
 
 # Planned Development. 
 
-Plans for further development include deploying a Django API to provide query-capability to the ASN objects stored in Redis. 
+[Proof of Concept COMPLETED] Plans for further development include deploying a Django API to provide query-capability to the ASN objects stored in Redis. 
 
 Additional plans include the development of a console application which will allow technically-capable operators to generate on-the-fly descriptive metrics of the ASN threat-landscape described by the data indexed in Redis in quasi-realtime.  
 

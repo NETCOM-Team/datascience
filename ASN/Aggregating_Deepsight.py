@@ -25,12 +25,12 @@ def creating_files(inputPath, outputPath):
 
     c_size = 1000
     ip_data_fields = ['Id','Data Type','feed.feed_source_date',
-                   'ip.address','ip.asn','ip.confidence'	,'ip.connection.carrier',
+                   'ip.address','ip.asn','ip.confidence','ip.connection.carrier',
                    'ip.connection.second_level_domain',	'ip.connection.top_level_domain',
                    'ip.consecutiveListings','ip.hostility',
                    'ip.location.country_code','ip.location.latitude','ip.location.longitude',
                    'ip.organization.naics','ip.reputationRating']
-    url_data_fields = ['Id',	'Data Type','feed.feed_source_date',
+    url_data_fields = ['Id','Data Type','feed.feed_source_date',
                        'xml.domain.ipAddresses.ip.address','xml.domain.ipAddresses.ip.asn',
                        'xml.domain.confidence','xml.domain.ipAddresses.ip.connection.carrier',
                        'xml.domain.ipAddresses.ip.connection.second_level_domain',
@@ -42,7 +42,7 @@ def creating_files(inputPath, outputPath):
                        'xml.domain.ipAddresses.ip.organization.naics',
                        'xml.domain.reputationRating']
     ipNamesDict = {'Id':'ID','Data Type':'Data_Type',
-                   'feed.feed_description':'Description',
+                   'feed.feed_source_date':'Source_Date',
                    'ip.address':'IP_Address','ip.asn':'ASN',
                    'ip.confidence':'Confidence',
                    'ip.connection.carrier':'Connection_Carrier',
