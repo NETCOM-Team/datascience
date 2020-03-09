@@ -126,7 +126,8 @@ def get_katz_centrality(centrality_struct):
 # Creating ASN objects for all possible ASNS
 def creating_asns(outputPath):
 
-    r = redis.Redis(host="localhost", port=6379)
+    redis_host = os.getenv('REDIS_HOST')
+    r = redis.Redis(host=redis_host, port=6379)
     asn_scores_output = outputPath + '/ASN_Scores.csv'
     geolite_input = outputPath + '/geolite_lookup.csv'
     master_input = outputPath + '/MASTER.csv'

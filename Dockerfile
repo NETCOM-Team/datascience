@@ -1,6 +1,6 @@
 FROM python:latest
 ENV PYTHONUNBUFFERED 0
-ENV REDIS_HOST localhost
+ENV REDIS_HOST redis
 ENV REDIS_PORT 6379
 
 LABEL maintainer="rmccarth@andrew.cmu.edu"
