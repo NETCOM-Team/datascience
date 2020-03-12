@@ -15,6 +15,9 @@ from networkx.algorithms import community
 import ast
 import redis
 import os
+import json
+import numpy as np
+
 #Event class for each entry in Datafeed
 class Event:
     def __init__(self,event_id, ip_address, confidence, hostility, reputation_rating):
@@ -94,9 +97,23 @@ class ASN:
     def set_ev_centrality(self, ev_centrality):
         self.ev_centrality = ev_centrality
 
-    def set_katz_centrality(self, katz_centrality):
-        self.ev_centrality = katz_centrality
+    @staticmethod
+    def serialize_asn(asn_obj):
+        serialized_events = []
+        for event in asn_obj.events_list:
+            serialized_events.append(event.__dict__)
+        asn_obj.events_list = json.dumps(serialized_events)
+        return json.dumps(asn_obj.__dict__, sort_keys=True, cls=PandasEncoder)
 
+
+class PandasEncoder(json.JSONEncoder):
+     def default(self, obj):
+         if isinstance(obj, np.int64):
+             return int(obj)
+         elif isinstance(obj, np.float64):
+             return float(obj)
+         else:
+             return super(PandasEncoder, self).default(obj)
 
 def create_asn_graph(asn_obj_dict):
      G = nx.Graph()
@@ -109,19 +126,11 @@ def create_asn_graph(asn_obj_dict):
 
 def get_eigenvector_centrality(centrality_struct):
      ints = []
-     strs = []
      for tup in centrality_struct.items():
          if isinstance(tup[0], int):
              ints.append(tup)
      return ints
 
-def get_katz_centrality(centrality_struct):
-     ints = []
-     strs = []
-     for tup in centrality_struct.items():
-         if isinstance(tup[0], int):
-             ints.append(tup)
-     return ints
 
 # Creating ASN objects for all possible ASNS
 def creating_asns(outputPath):
@@ -158,8 +167,6 @@ def creating_asns(outputPath):
 #        asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
         asn_objects[as_number].has_events = True
 
-
-
     for obj in asn_objects:
         if obj.has_events:
             event_objects.append(obj)
@@ -167,18 +174,12 @@ def creating_asns(outputPath):
     print('getting eigenvector centrality')
     G = create_asn_graph(event_objects)
     ev_centrality = nx.eigenvector_centrality_numpy(G)
-    #katz_centrality = nx.katz_centrality_numpy(G)
     asn_ev_centralities = get_eigenvector_centrality(ev_centrality)
-    #asn_katz_centralities = get_katz_centrality(katz_centrality)
 
     i = 0
     for obj in event_objects:
         obj.set_ev_centrality(asn_ev_centralities[i])
-        #obj.set_katz_centrality(asn_katz_centralities[i])
         i += 1
-
-    #print(asn_objects[0].as_number, asn_objects[0].ev_centrality)
-
 
     master_df['Event_Score'] = event_score
     master_df['Historical_Score'] = asn_chrono_score_list
@@ -187,7 +188,7 @@ def creating_asns(outputPath):
        writer = csv.writer(file)
        writer.writerow(['ASN', 'Score', 'Total_IPs', 'Badness', 'Exists', 'EV Centrality'])
        for x in asn_objects:
-           r.set(x.as_number, x.score)
+           r.set(x.as_number, ASN.serialize_asn(x))
            if(x.total_ips > 0 or x.score > 0):
                writer.writerow([x.as_number, x.score, x.total_ips, x.badness, True, x.ev_centrality])
            else:
