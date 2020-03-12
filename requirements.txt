@@ -4,3 +4,4 @@ ipaddress
 networkx
 scipy
 redis
+numpy
