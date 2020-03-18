@@ -13,8 +13,8 @@ from operator import itemgetter
 import networkx as nx
 from networkx.algorithms import community
 import ast
-import redis
 import os
+import redis
 import json
 import numpy as np
 

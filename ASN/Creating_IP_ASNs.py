@@ -53,8 +53,7 @@ def create_whois_lookup(asn_df):
 
 #Creating Geolite csv to find IP/ASN mapping
 def create_geolite_lookup(inputPath, outputPath):
-    print("test")
-    print("Creating Geolite")
+    print("Creating Geolite Whois")
     geolite_input_file = inputPath + 'geolite.csv'
     geolite_output_file = outputPath + 'geolite_lookup.csv'
     print(geolite_input_file)

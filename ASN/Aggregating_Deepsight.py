@@ -116,19 +116,41 @@ def dropping_multiple_ips_asns(inputPath, df):
 #            print(y)
 #    exit()
     drop_set = set()
+#    new_df = pd.DataFrame()
+    temp_list = []
     print('Looping through dataframe')
+    counter = 0
+    print("Length of DF: ", len(df.index))
     for x in range(len(df.index)):
+        print(counter)
+        counter += 1
+        ip_addr = str(df['IP_Address'][x])
         if(str(df['IP_Address'][x]) == 'nan'):
+#            print(str(df['IP_Address'][x]))
             drop_set.add(x)
-        elif(len(str(df['IP_Address'][x])) > 15):
-#            cleaning_multiple_ips(df['IP_Address'][x], geo_df, cached_list)
+        elif(ip_addr[0].isdigit() == False):
+            drop_set.add(x)
+        elif(len(ip_addr) > 15):
+#            ip_list = cleaning_multiple_ips(df['IP_Address'][x], geo_df, cached_list)
+#            print("This is the IP LIST: ", ip_list)
+#            print(df.iloc[x])
+#            for y in ip_list:
+#                if(y[1] != -1):
+#                    temp_rows = df.iloc[x].copy()
+#                    temp_rows['IP_Address'] = y[0]
+#                    temp_rows['ASN'] = y[1]
+#                    temp_list.append(temp_rows)
+#                print((temp_rows))
+#            temp_row = df[x]
             drop_set.add(x)
         elif(str(df['ASN'][x]) == 'nan'):
             drop_set.add(x)
         elif(len(str(df['ASN'][x])) > 12):
             drop_set.add(x)
-
+    
     df.drop(drop_set, inplace = True)
+    temp_df = pd.DataFrame(temp_list)
+    df = df.append(temp_df)
     df['ASN'] = pd.to_numeric(df['ASN'], downcast='integer')
     df.sort_values(by=['ASN','Source_Date'], inplace=True)
     return df
@@ -138,36 +160,38 @@ def cleaning_multiple_ips(ips, geo_df, cached_list):
     ips = ips.split(',')
     for x in range(len(ips)):
         asn = find_ip_asn(ips[x], geo_df, cached_list)
-        print('This is the ASN: ', asn)
+#        print('This is the ASN: ', asn)
         ips[x] = [ips[x], asn]
-    print(ips)
+#    print(ips)
     return ips
         
 def find_ip_asn(ip, geo_df, cached_list):
-    print('Find IP ASN')
+#    print('Find IP ASN')
     temp = ip.split('.')
     for x in range(0,4):
             temp[x] = int(temp[x])
-    print('This is x: ', temp[0], type(temp[0]))
-    print('This is IP: ', ip)
+#    print('This is Temp: ', temp[0], type(temp[0]), temp[1], type(temp[1]))
+#    print('This is IP: ', ip)
     try:
-        start = cached_list[temp[0]-1][temp[1]-1]
+#        print("This is cache0: ", cached_list[temp[0]])
+#        print("This is cache1: ", cached_list[temp[0]][temp[1]])
+        start = cached_list[temp[0]][temp[1]-1]
         end = cached_list[temp[0]][temp[1]]
-    except:
-        print('Error This is x: ', x)
-        return
+    except Exception as E:
+#        print(E, temp[0], temp[1]-1)
+        return -1
     
-    print('Start and End', start,end)
+#    print('Start and End', start,end)
     
 #    exit()
     for x in range(start, end):
-        print("In Start End loop")
-#        for index, row in geo_df.iterrows():
-        print(geo_df['IP_CIDR'][x])
-        print(ipaddress.ip_address(ip))
+#        print("In Start End loop")
+##        for index, row in geo_df.iterrows():
+#        print(geo_df['IP_CIDR'][x])
+#        print(ipaddress.ip_address(ip))
         if(ipaddress.ip_address(ip) in ipaddress.ip_network(geo_df['IP_CIDR'][x])):
-            print("THIS IS HIT\n\n\n")
-            exit()
+#            print("THIS IS HIT\n\n\n")
+#            exit()
             return geo_df['ASN'][x]
     return -1        
 
@@ -177,6 +201,7 @@ def creating_cached_list(geo_df, inputPath):
     cl1 = [0] * 256
     cl2 = [0] * 256
     current_ip = [0,0,0]
+    c = 0 
     for index, row in geo_df.iterrows():
         temp = row['IP_List'].strip('][').split(', ')
         for x in range(0,4):
@@ -184,17 +209,50 @@ def creating_cached_list(geo_df, inputPath):
 #        print("row['IP_List']", row['IP_List'], type(row['IP_List']))
 #        print(temp, type(temp))
 #        print(current_ip[0], current_ip[1], current_ip[2])
+#        if(current_ip[0] != temp[0]):
+#            cl0[current_ip[0]] = cl1
+#            current_ip[0] = temp[0]
+#        print("What is the index: ", index)
+#        print("[current_ip[0]] is: ", current_ip[0])
+#        print("[current_ip[1]] is: ", current_ip[1])
+#        print("cl0[current_ip[0]] is: ", cl0[current_ip[0]])
+#        print("cl1[current_ip[1]] is: ", cl1[current_ip[1]])
+#        print("temp[0], temp[1]", temp[0], temp[1])
+        
         if(current_ip[0] != temp[0]):
+#            print(current_ip[0])
+            cl1[current_ip[1]] = index
+            current_ip[1] = temp[1]
             cl0[current_ip[0]] = cl1
+            cl1 = [0] * 256
+#            print("Break", cl0[current_ip[0]], "\n\n\n\n")
+#            print(cl0)
             current_ip[0] = temp[0]
+            
+        if(current_ip[1] != temp[1]):
             cl1[current_ip[1]] = index
+#            print("Break", cl1[current_ip[1]], "\n\n\n\n")
             current_ip[1] = temp[1]
-        elif(current_ip[1] != temp[1]):
-            cl1[current_ip[1]] = index
-            current_ip[1] = temp[1]
-           
+            
+        
+#        if(c == 7000):
+#            exit()
+#        else:
+#            c += 1
+    last = 0
+    for x in cl0:
+        try:
+            for y in x:
+                if(y == 0):
+                    y = last
+                else:
+                    last = y
+        except:
+            pass
             
     cached_list = cl0
+#    print("This is being printed", cached_list)
+#    exit()
     with open(inputPath + '/cached_list.txt', "wb") as fp:   #Pickling
         pickle.dump(cached_list, fp)
     return cached_list
