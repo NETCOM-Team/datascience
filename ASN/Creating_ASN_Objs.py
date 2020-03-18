@@ -13,8 +13,8 @@ from operator import itemgetter
 import networkx as nx
 from networkx.algorithms import community
 import ast
-import redis
 import os
+import redis
 #Event class for each entry in Datafeed
 class Event:
     def __init__(self,event_id, ip_address, confidence, hostility, reputation_rating):
