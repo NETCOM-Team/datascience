@@ -49,7 +49,7 @@ def creating_files(inputPath, outputPath):
                    'ip.connection.second_level_domain':'Connection_Second_Level_Domain',
                    'ip.connection.top_level_domain':'Connection_Top_Level_Domain',
                    'ip.consecutiveListings':'Consecutive_Listings',
-                   'ip.hostility':'Hostility',
+                   'ip.hostility': 'Hostility',
                    'ip.location.country_code':'Country_Code',
                    'ip.location.latitude':'Latitude',
                    'ip.location.longitude':'Longitude',
