@@ -22,7 +22,7 @@ def main():
         os.mkdir(input_path)
     if not os.path.isdir(output_path):
         os.mkdir(output_path)
-    if not os.path.exists(input_path + '/geolite_lookup.csv'):
+    if not os.path.exists(output_path + 'geolite_lookup.csv'):
         ASN.Creating_IP_ASNs.create_geolite_lookup(input_path, output_path)
 
     ASN.Aggregating_Deepsight.creating_files(input_path, output_path)
