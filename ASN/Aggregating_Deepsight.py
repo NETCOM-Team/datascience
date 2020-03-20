@@ -18,8 +18,6 @@ import pickle
 def creating_files(inputPath, outputPath):
     """Creating Files."""
     print("Creating Files")
-#    inputPath = 'Data/'
-#    outputPath = 'Data/Output/'
     master_output = '/MASTER.csv'
     ipFileNames = "Deepsight IP"
     urlFileNames = "Deepsight URL"

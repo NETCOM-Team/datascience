@@ -65,7 +65,7 @@ class ASN:
             self.as_number = False
         self.events_list = []
         self.score = 0
-        self.total_ips = False
+        self.total_ips = 0
         self.badness = 0
         self.has_events = False
         self.ev_centrality = 0
@@ -137,6 +137,7 @@ def get_eigenvector_centrality(centrality_struct):
             ints.append(tup)
     return ints
 
+
 def top_10_badness_viz(asn_obj_dict):
     newlist = sorted(asn_obj_dict, key=lambda x: x.badness, reverse=True)
     top_10 = newlist[:10]
@@ -152,6 +153,7 @@ def top_10_badness_viz(asn_obj_dict):
     plt.title("""Top 10 ASN's by Badness""")
     plt.show()
 
+
 def fast_mover_asn_viz(asn_number):
     df = pd.read_csv('master/MASTER.csv')
     df = df.loc[df['ASN'] == asn_number]
@@ -163,7 +165,8 @@ def fast_mover_asn_viz(asn_number):
     plt.ylabel('Historical Badness')
     plt.title('Badness over time for ASN {}'.format(asn_number))
     plt.show()
-    
+
+
 def create_max_asn_objects():
     """Creating Max ASN Objects"""
     max_range = 600000
@@ -188,7 +191,7 @@ def updating_master_and_scores(master_df, asn_objects,
                            master_df['Reputation_Rating'][number])
         asn_objects[as_number].events_list.append(temp_event)
         event_score.append(temp_event.create_score())
-        if asn_objects[as_number].total_ips is False:
+        if asn_objects[as_number].total_ips == 0:
             asn = asn_objects[as_number].as_number
             asn_objects[as_number].total_ips = geolite_df['Total_IPs'][asn]
             asn_objects[as_number].set_total_ips()
@@ -218,7 +221,7 @@ def creating_asns(output_path):
     print('about to visualize')
     #fast_mover_asn_viz(3)
     #top_10_badness_viz(asn_objects)
-    creating_asn_evs(asn_objects)
+#    creating_asn_evs(asn_objects)
     outputting_asns(asn_scores_output, asn_objects)
 
 
@@ -241,14 +244,14 @@ def creating_asn_evs(asn_objects):
 
 def outputting_asns(output_file, asn_objects):
     """Outputting ASN Scores."""
-    redis_host = os.getenv('REDIS_HOST')
-    redis_instance = redis.Redis(host=redis_host, port=6379)
+#    redis_host = os.getenv('REDIS_HOST')
+#    redis_instance = redis.Redis(host=redis_host, port=6379)
     with open(output_file, 'w') as file:
         writer = csv.writer(file)
         writer.writerow(['ASN', 'Score', 'Total_IPs',
                          'Badness', 'Exists', 'EV Centrality'])
         for asn in asn_objects:
-            redis_instance.set(asn.as_number, ASN.serialize_asn(asn))
+#            redis_instance.set(asn.as_number, ASN.serialize_asn(asn))
             if(asn.total_ips > 0 or asn.score > 0):
                 writer.writerow([asn.as_number, asn.score, asn.total_ips,
                                  asn.badness, True, asn.ev_centrality])
@@ -256,4 +259,3 @@ def outputting_asns(output_file, asn_objects):
                 writer.writerow([asn.as_number, asn.score, asn.total_ips,
                                  asn.badness, False, asn.ev_centrality])
 
-    
