@@ -15,6 +15,8 @@ import redis
 import pandas as pd
 import networkx as nx
 import numpy as np
+import matplotlib.pyplot as plt
+
 # from operator import itemgetter
 # from networkx.algorithms import community
 
@@ -63,7 +65,7 @@ class ASN:
             self.as_number = False
         self.events_list = []
         self.score = 0
-        self.total_ips = False
+        self.total_ips = 0
         self.badness = 0
         self.has_events = False
         self.ev_centrality = 0
@@ -92,7 +94,7 @@ class ASN:
 
     def set_ev_centrality(self, ev_centrality):
         """Setting EV Centrality for ASN."""
-        self.ev_centrality = ev_centrality
+        self.ev_centrality = ev_centrality[1]
 
     @staticmethod
     def serialize_asn(asn_obj):
@@ -136,6 +138,35 @@ def get_eigenvector_centrality(centrality_struct):
     return ints
 
 
+def top_10_badness_viz(asn_obj_dict):
+    newlist = sorted(asn_obj_dict, key=lambda x: x.badness, reverse=True)
+    top_10 = newlist[:10]
+    asn_nums = []
+    badness = []
+    for item in top_10:
+        asn_nums.append(item.as_number)
+        badness.append(item.badness)
+    y_pos = np.arange(len(asn_nums))
+    plt.bar(y_pos, badness, align='center', alpha=0.5)
+    plt.xticks(y_pos, asn_nums, rotation=90)
+    plt.ylabel('Badness Score')
+    plt.title("""Top 10 ASN's by Badness""")
+    plt.show()
+
+
+def fast_mover_asn_viz(asn_number):
+    df = pd.read_csv('master/MASTER.csv')
+    df = df.loc[df['ASN'] == asn_number]
+    dates = [x[0:10] for x in df['Source_Date']]
+    scores = list(df['Historical_Score'])
+    y_pos = np.arange(len(dates))
+    plt.plot(y_pos, scores, '-o')
+    plt.xticks(y_pos, dates, rotation=90)
+    plt.ylabel('Historical Badness')
+    plt.title('Badness over time for ASN {}'.format(asn_number))
+    plt.show()
+
+
 def create_max_asn_objects():
     """Creating Max ASN Objects"""
     max_range = 600000
@@ -160,7 +191,7 @@ def updating_master_and_scores(master_df, asn_objects,
                            master_df['Reputation_Rating'][number])
         asn_objects[as_number].events_list.append(temp_event)
         event_score.append(temp_event.create_score())
-        if asn_objects[as_number].total_ips is False:
+        if asn_objects[as_number].total_ips == 0:
             asn = asn_objects[as_number].as_number
             asn_objects[as_number].total_ips = geolite_df['Total_IPs'][asn]
             asn_objects[as_number].set_total_ips()
@@ -187,6 +218,9 @@ def creating_asns(output_path):
     master_df.sort_values(by=['ASN', 'Source_Date'], inplace=True)
     asn_objects = updating_master_and_scores(master_df, asn_objects,
                                              geolite_df, master_input)
+    print('about to visualize')
+    #fast_mover_asn_viz(3)
+    #top_10_badness_viz(asn_objects)
     creating_asn_evs(asn_objects)
     outputting_asns(asn_scores_output, asn_objects)
 
@@ -224,3 +258,4 @@ def outputting_asns(output_file, asn_objects):
             else:
                 writer.writerow([asn.as_number, asn.score, asn.total_ips,
                                  asn.badness, False, asn.ev_centrality])
+
