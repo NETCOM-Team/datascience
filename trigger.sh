@@ -10,4 +10,5 @@ do
     ./driver.py
     #driver.py outputs a MASTER.csv file of compiled threat intel feeds to the master/ directory
     aws s3 cp master/MASTER.csv s3://$BUCKET_NAME
+    aws s3 cp master/ASN_Scores.csv s3://$BUCKET_NAME
 done
