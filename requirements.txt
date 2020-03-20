@@ -5,7 +5,3 @@ networkx
 scipy
 redis
 numpy
-<<<<<<< HEAD
-
-=======
->>>>>>> master
