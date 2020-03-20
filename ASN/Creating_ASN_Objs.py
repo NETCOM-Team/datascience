@@ -221,7 +221,7 @@ def creating_asns(output_path):
     print('about to visualize')
     #fast_mover_asn_viz(3)
     #top_10_badness_viz(asn_objects)
-#    creating_asn_evs(asn_objects)
+    creating_asn_evs(asn_objects)
     outputting_asns(asn_scores_output, asn_objects)
 
 
@@ -244,14 +244,14 @@ def creating_asn_evs(asn_objects):
 
 def outputting_asns(output_file, asn_objects):
     """Outputting ASN Scores."""
-#    redis_host = os.getenv('REDIS_HOST')
-#    redis_instance = redis.Redis(host=redis_host, port=6379)
+    redis_host = os.getenv('REDIS_HOST')
+    redis_instance = redis.Redis(host=redis_host, port=6379)
     with open(output_file, 'w') as file:
         writer = csv.writer(file)
         writer.writerow(['ASN', 'Score', 'Total_IPs',
                          'Badness', 'Exists', 'EV Centrality'])
         for asn in asn_objects:
-#            redis_instance.set(asn.as_number, ASN.serialize_asn(asn))
+            redis_instance.set(asn.as_number, ASN.serialize_asn(asn))
             if(asn.total_ips > 0 or asn.score > 0):
                 writer.writerow([asn.as_number, asn.score, asn.total_ips,
                                  asn.badness, True, asn.ev_centrality])
