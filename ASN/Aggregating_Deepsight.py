@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 
 # -*- coding: utf-8 -*-
 """
@@ -11,15 +11,14 @@ import pandas as pd
 import os
 import ipaddress
 import pickle
+import sys
 # from netaddr import CIDR, IP
 # Creating CSVs from Deepsight Data
 
 
-def creating_files(inputPath, outputPath):
+def creating_files(input_path, output_path):
     """Creating Files."""
     print("Creating Files")
-#    inputPath = 'Data/'
-#    outputPath = 'Data/Output/'
     master_output = '/MASTER.csv'
     ipFileNames = "Deepsight IP"
     urlFileNames = "Deepsight URL"
@@ -27,28 +26,33 @@ def creating_files(inputPath, outputPath):
     urlFiles = []
 
     c_size = 1000
-    ip_data_fields = ['Id', 'Data Type', 'feed.feed_source_date',
-                      'ip.address', 'ip.asn', 'ip.confidence',
-                      'ip.connection.carrier',
-                      'ip.connection.second_level_domain',
-                      'ip.connection.top_level_domain',
-                      'ip.consecutiveListings', 'ip.hostility',
-                      'ip.location.country_code', 'ip.location.latitude',
-                      'ip.location.longitude',
-                      'ip.organization.naics', 'ip.reputationRating']
-    url_data_fields = ['Id', 'Data Type', 'feed.feed_source_date',
-                       'xml.domain.ipAddresses.ip.address',
-                       'xml.domain.ipAddresses.ip.asn',
-                       'xml.domain.confidence',
-                       'xml.domain.ipAddresses.ip.connection.carrier',
-                       'xml.domain.ipAddresses.ip.connection.second_level_domain',
-                       'xml.domain.ipAddresses.ip.connection.top_level_domain',
-                       'xml.domain.consecutiveListings',
-                       'xml.domain.ipAddresses.ip.location.country_code',
-                       'xml.domain.ipAddresses.ip.location.latitude',
-                       'xml.domain.ipAddresses.ip.location.longitude',
-                       'xml.domain.ipAddresses.ip.organization.naics',
-                       'xml.domain.reputationRating']
+    with open(input_path + 'ip_data_fields.txt') as f:
+        ip_data_fields = f.read().splitlines()
+    with open(input_path + 'url_data_fields.txt') as f:
+        url_data_fields = f.read().splitlines()
+#    sys.exit()
+#    ip_data_fields = ['Id', 'Data Type', 'feed.feed_source_date',
+#                      'ip.address', 'ip.asn', 'ip.confidence',
+#                      'ip.connection.carrier',
+#                      'ip.connection.second_level_domain',
+#                      'ip.connection.top_level_domain',
+#                      'ip.consecutiveListings', 'ip.hostility',
+#                      'ip.location.country_code', 'ip.location.latitude',
+#                      'ip.location.longitude',
+#                      'ip.organization.naics', 'ip.reputationRating']
+#    url_data_fields = Id Data Type feed.feed_source_date
+#                       xml.domain.ipAddresses.ip.address
+#                       xml.domain.ipAddresses.ip.asn
+#                       xml.domain.confidence
+#                       xml.domain.ipAddresses.ip.connection.carrier
+#                       xml.domain.ipAddresses.ip.connection.second_level_domain
+#                       xml.domain.ipAddresses.ip.connection.top_level_domain
+#                       xml.domain.consecutiveListings
+#                       xml.domain.ipAddresses.ip.location.country_code
+#                       xml.domain.ipAddresses.ip.location.latitude
+#                       xml.domain.ipAddresses.ip.location.longitude
+#                       xml.domain.ipAddresses.ip.organization.naics
+#                       xml.domain.reputationRating
     ipNamesDict = {'Id': 'ID','Data Type': 'Data_Type',
                    'feed.feed_source_date': 'Source_Date',
                    'ip.address': 'IP_Address','ip.asn': 'ASN',
@@ -77,57 +81,57 @@ def creating_files(inputPath, outputPath):
                        'xml.domain.ipAddresses.ip.location.longitude': 'Longitude',
                        'xml.domain.ipAddresses.ip.organization.naics': 'Naics',
                        'xml.domain.reputationRating': 'Reputation_Rating'}
-    ipFiles = get_files(inputPath, ipFileNames)
-    urlFiles = get_files(inputPath, urlFileNames)
-    ipMaster_df = create_ip_url_master_df(inputPath, outputPath,
+    ipFiles = get_files(input_path, ipFileNames)
+    urlFiles = get_files(input_path, urlFileNames)
+    ipMaster_df = create_ip_url_master_df(input_path, output_path,
                                           ipFiles, c_size,
                                           ip_data_fields, "/IP_Master")
-    urlMaster_df = create_ip_url_master_df(inputPath, outputPath, urlFiles,
+    urlMaster_df = create_ip_url_master_df(input_path, output_path, urlFiles,
                                            c_size, url_data_fields,
                                            "/URL_Master")
     ipMaster_df.rename(columns=ipNamesDict, inplace=True)
     urlMaster_df.rename(columns=urlNamesDict, inplace=True)
     total_master = pd.concat([ipMaster_df, urlMaster_df], axis=0,
                              ignore_index=True, sort=False)
-    total_master = dropping_multiple_ips_asns(inputPath, total_master)
-    total_master.to_csv(outputPath + master_output)
+    total_master = dropping_multiple_ips_asns(input_path, total_master)
+    total_master.to_csv(output_path + master_output)
 
 
-def get_files(inputPath, fileNames):
+def get_files(input_path, fileNames):
     """Getting Files from directory using convention"""
     file_list = []
-    for i in os.listdir(inputPath):
+    for i in os.listdir(input_path):
         if(i.startswith(fileNames)):
             file_list.append(i)
             print("Creating " + i)
     return file_list
 
 
-def create_ip_url_master_df(inputPath, outputPath, files,
+def create_ip_url_master_df(input_path, output_path, files,
                             c_size, data_fields, outputName):
     """Creating DFs for both IP and URL Deepsight Data"""
     df = pd.DataFrame()
     for file in files:
         df_chunk = pd.DataFrame()
-        for chunk in pd.read_csv(inputPath + '/' + file, chunksize=c_size,
+        for chunk in pd.read_csv(input_path + '/' + file, chunksize=c_size,
                                  usecols=data_fields):
             df_chunk = pd.concat([df_chunk, chunk])
 
         df = pd.concat([df, df_chunk])
-#        df_chunk.to_csv(outputPath + 'output_' + file)
+#        df_chunk.to_csv(output_path + 'output_' + file)
 
-#    df.to_csv(outputPath + 'output_' + outputName + '.csv')
+#    df.to_csv(output_path + 'output_' + outputName + '.csv')
     return df
 
 
-def dropping_multiple_ips_asns(inputPath, df):
+def dropping_multiple_ips_asns(input_path, df):
     """Getting rid of multiple IPs and ASNs"""
     print("Dropping multiple IPs and ASNs")
-#    geoPath = inputPath + '/geolite3.csv'
+#    geoPath = input_path + '/geolite3.csv'
 #    geo_df = pd.read_csv(geoPath)
-#    with open(inputPath + '/cached_list.txt', "rb") as fp:   # Unpickling
+#    with open(input_path + '/cached_list.txt', "rb") as fp:   # Unpickling
 #        cached_list = pickle.load(fp)
-#    cached_list = creating_cached_list(geo_df, inputPath)
+#    cached_list = creating_cached_list(geo_df, input_path)
 #    print(cached_list)
 #    for x in cached_list:
 #        for y in x:
@@ -219,7 +223,7 @@ def find_ip_asn(ip, geo_df, cached_list):
     return -1
 
 
-def creating_cached_list(geo_df, inputPath):
+def creating_cached_list(geo_df, input_path):
     """Creating Cached List"""
     print("Creating Cached List")
     cl0 = [0] * 256
@@ -277,6 +281,6 @@ def creating_cached_list(geo_df, inputPath):
     cached_list = cl0
 #    print("This is being printed", cached_list)
 #    exit()
-    with open(inputPath + '/cached_list.txt', "wb") as fp:
+    with open(input_path + '/cached_list.txt', "wb") as fp:
         pickle.dump(cached_list, fp)
     return cached_list

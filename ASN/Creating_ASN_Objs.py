@@ -63,7 +63,7 @@ class ASN:
             self.as_number = False
         self.events_list = []
         self.score = 0
-        self.total_ips = False
+        self.total_ips = 0
         self.badness = 0
         self.has_events = False
         self.ev_centrality = 0
@@ -83,7 +83,7 @@ class ASN:
 
     def set_total_ips(self):
         """Setting total IPs for ASN."""
-        if self.total_ips is False or self.total_ips == 0:
+        if self.total_ips == 0:
             self.total_ips = 256
 
     def create_badness(self):
@@ -160,7 +160,7 @@ def updating_master_and_scores(master_df, asn_objects,
                            master_df['Reputation_Rating'][number])
         asn_objects[as_number].events_list.append(temp_event)
         event_score.append(temp_event.create_score())
-        if asn_objects[as_number].total_ips is False:
+        if asn_objects[as_number].total_ips == 0:
             asn = asn_objects[as_number].as_number
             asn_objects[as_number].total_ips = geolite_df['Total_IPs'][asn]
             asn_objects[as_number].set_total_ips()
@@ -187,7 +187,7 @@ def creating_asns(output_path):
     master_df.sort_values(by=['ASN', 'Source_Date'], inplace=True)
     asn_objects = updating_master_and_scores(master_df, asn_objects,
                                              geolite_df, master_input)
-    creating_asn_evs(asn_objects)
+#    creating_asn_evs(asn_objects)
     outputting_asns(asn_scores_output, asn_objects)
 
 
@@ -210,14 +210,14 @@ def creating_asn_evs(asn_objects):
 
 def outputting_asns(output_file, asn_objects):
     """Outputting ASN Scores."""
-    redis_host = os.getenv('REDIS_HOST')
-    redis_instance = redis.Redis(host=redis_host, port=6379)
+#    redis_host = os.getenv('REDIS_HOST')
+#    redis_instance = redis.Redis(host=redis_host, port=6379)
     with open(output_file, 'w') as file:
         writer = csv.writer(file)
         writer.writerow(['ASN', 'Score', 'Total_IPs',
                          'Badness', 'Exists', 'EV Centrality'])
         for asn in asn_objects:
-            redis_instance.set(asn.as_number, ASN.serialize_asn(asn))
+#            redis_instance.set(asn.as_number, ASN.serialize_asn(asn))
             if(asn.total_ips > 0 or asn.score > 0):
                 writer.writerow([asn.as_number, asn.score, asn.total_ips,
                                  asn.badness, True, asn.ev_centrality])
