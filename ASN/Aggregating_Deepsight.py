@@ -11,6 +11,7 @@ import pandas as pd
 import os
 import ipaddress
 import pickle
+import ASN
 # from netaddr import CIDR, IP
 # Creating CSVs from Deepsight Data
 
@@ -19,10 +20,25 @@ def creating_files(inputPath, outputPath):
     """Creating Files."""
     print("Creating Files")
     master_output = '/MASTER.csv'
+
+    redis_instance = ASN.Creating_ASN_Objs.start_redis()
+    if redis_instance.exists('master_version'):
+        print('inside creating_files;')
+        master_version = int(redis_instance.get('master_version').decode('utf-8'))
+        print('master version: {}'.format(master_version))
+        print('master version type: {}'.format(type(master_version)))
+        if master_version > 1:
+            print('master version bigger than 1?: {}'.format(master_version))
+            master_output = '/MASTER' + str(master_version) + '.csv'
+            ASN.Creating_ASN_Objs.stop_redis(redis_instance)
+    else:
+        ASN.Creating_ASN_Objs.stop_redis(redis_instance)
+    
+    
     ipFileNames = "Deepsight IP"
-    urlFileNames = "Deepsight URL"
+    # urlFileNames = "Deepsight URL"
     ipFiles = []
-    urlFiles = []
+    # urlFiles = []
 
     c_size = 1000
     ip_data_fields = ['Id', 'Data Type', 'feed.feed_source_date',
@@ -34,19 +50,19 @@ def creating_files(inputPath, outputPath):
                       'ip.location.country_code', 'ip.location.latitude',
                       'ip.location.longitude',
                       'ip.organization.naics', 'ip.reputationRating']
-    url_data_fields = ['Id', 'Data Type', 'feed.feed_source_date',
-                       'xml.domain.ipAddresses.ip.address',
-                       'xml.domain.ipAddresses.ip.asn',
-                       'xml.domain.confidence',
-                       'xml.domain.ipAddresses.ip.connection.carrier',
-                       'xml.domain.ipAddresses.ip.connection.second_level_domain',
-                       'xml.domain.ipAddresses.ip.connection.top_level_domain',
-                       'xml.domain.consecutiveListings',
-                       'xml.domain.ipAddresses.ip.location.country_code',
-                       'xml.domain.ipAddresses.ip.location.latitude',
-                       'xml.domain.ipAddresses.ip.location.longitude',
-                       'xml.domain.ipAddresses.ip.organization.naics',
-                       'xml.domain.reputationRating']
+    # url_data_fields = ['Id', 'Data Type', 'feed.feed_source_date',
+    #                    'xml.domain.ipAddresses.ip.address',
+    #                    'xml.domain.ipAddresses.ip.asn',
+    #                    'xml.domain.confidence',
+    #                    'xml.domain.ipAddresses.ip.connection.carrier',
+    #                    'xml.domain.ipAddresses.ip.connection.second_level_domain',
+    #                    'xml.domain.ipAddresses.ip.connection.top_level_domain',
+    #                    'xml.domain.consecutiveListings',
+    #                    'xml.domain.ipAddresses.ip.location.country_code',
+    #                    'xml.domain.ipAddresses.ip.location.latitude',
+    #                    'xml.domain.ipAddresses.ip.location.longitude',
+    #                    'xml.domain.ipAddresses.ip.organization.naics',
+    #                    'xml.domain.reputationRating']
     ipNamesDict = {'Id': 'ID','Data Type': 'Data_Type',
                    'feed.feed_source_date': 'Source_Date',
                    'ip.address': 'IP_Address','ip.asn': 'ASN',
@@ -61,33 +77,33 @@ def creating_files(inputPath, outputPath):
                    'ip.location.longitude': 'Longitude',
                    'ip.organization.naics': 'Naics',
                    'ip.reputationRating': 'Reputation_Rating'}
-    urlNamesDict = {'Id': 'ID',	'Data Type': 'Data_Type',
-                    'feed.feed_source_date': 'Source_Date',
-                       'xml.domain.ipAddresses.ip.address': 'IP_Address',
-                       'xml.domain.ipAddresses.ip.asn': 'ASN',
-                       'xml.domain.confidence': 'Confidence',
-                       'xml.domain.ipAddresses.ip.connection.carrier': 'Connection_Carrier',
-                       'xml.domain.ipAddresses.ip.connection.second_level_domain': 'Connection_Second_Level_Domain',
-                       'xml.domain.ipAddresses.ip.connection.top_level_domain': 'Connection_Top_Level_Domain',
-                       'xml.domain.consecutiveListings': 'Consecutive_Listings',
-                       'xml.domain.ipAddresses.ip.location.country_code': 'Country_Code',
-                       'xml.domain.ipAddresses.ip.location.latitude': 'Latitude',
-                       'xml.domain.ipAddresses.ip.location.longitude': 'Longitude',
-                       'xml.domain.ipAddresses.ip.organization.naics': 'Naics',
-                       'xml.domain.reputationRating': 'Reputation_Rating'}
+    # urlNamesDict = {'Id': 'ID',	'Data Type': 'Data_Type',
+    #                 'feed.feed_source_date': 'Source_Date',
+    #                    'xml.domain.ipAddresses.ip.address': 'IP_Address',
+    #                    'xml.domain.ipAddresses.ip.asn': 'ASN',
+    #                    'xml.domain.confidence': 'Confidence',
+    #                    'xml.domain.ipAddresses.ip.connection.carrier': 'Connection_Carrier',
+    #                    'xml.domain.ipAddresses.ip.connection.second_level_domain': 'Connection_Second_Level_Domain',
+    #                    'xml.domain.ipAddresses.ip.connection.top_level_domain': 'Connection_Top_Level_Domain',
+    #                    'xml.domain.consecutiveListings': 'Consecutive_Listings',
+    #                    'xml.domain.ipAddresses.ip.location.country_code': 'Country_Code',
+    #                    'xml.domain.ipAddresses.ip.location.latitude': 'Latitude',
+    #                    'xml.domain.ipAddresses.ip.location.longitude': 'Longitude',
+    #                    'xml.domain.ipAddresses.ip.organization.naics': 'Naics',
+    #                    'xml.domain.reputationRating': 'Reputation_Rating'}
     ipFiles = get_files(inputPath, ipFileNames)
-    urlFiles = get_files(inputPath, urlFileNames)
+    # urlFiles = get_files(inputPath, urlFileNames)
     ipMaster_df = create_ip_url_master_df(inputPath, outputPath,
                                           ipFiles, c_size,
                                           ip_data_fields, "/IP_Master")
-    urlMaster_df = create_ip_url_master_df(inputPath, outputPath, urlFiles,
-                                           c_size, url_data_fields,
-                                           "/URL_Master")
+    # urlMaster_df = create_ip_url_master_df(inputPath, outputPath, urlFiles,
+    #                                        c_size, url_data_fields,
+    #                                        "/URL_Master")
     ipMaster_df.rename(columns=ipNamesDict, inplace=True)
-    urlMaster_df.rename(columns=urlNamesDict, inplace=True)
-    total_master = pd.concat([ipMaster_df, urlMaster_df], axis=0,
-                             ignore_index=True, sort=False)
-    total_master = dropping_multiple_ips_asns(inputPath, total_master)
+    # urlMaster_df.rename(columns=urlNamesDict, inplace=True)
+    # total_master = pd.concat([ipMaster_df, urlMaster_df], axis=0,
+    #                          ignore_index=True, sort=False)
+    total_master = dropping_multiple_ips_asns(inputPath, ipMaster_df)
     total_master.to_csv(outputPath + master_output)
 
 
@@ -138,7 +154,7 @@ def dropping_multiple_ips_asns(inputPath, df):
     counter = 0
     print("Length of DF: ", len(df.index))
     for x in range(len(df.index)):
-        print(counter)
+        #print(counter)
         counter += 1
         ip_addr = str(df['IP_Address'][x])
         if(str(df['IP_Address'][x]) == 'nan'):
