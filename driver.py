@@ -28,7 +28,6 @@ def main():
     ASN.Aggregating_Deepsight.creating_files(input_path, output_path)
 #    ASN.Creating_IP_ASNs.creating_ip_asn_lookups(input_path, output_path)
     ASN.Creating_ASN_Objs.creating_asns(output_path)
-#    ASN.Appending_Badness_Cleaned.append_badness()
     print("--- %s seconds ---" % (time.time() - start_time))
 
 

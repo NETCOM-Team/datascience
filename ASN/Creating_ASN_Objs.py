@@ -85,7 +85,7 @@ class ASN:
 
     def set_total_ips(self):
         """Setting total IPs for ASN."""
-        if self.total_ips is False or self.total_ips == 0:
+        if self.total_ips == 0:
             self.total_ips = 256
 
     def create_badness(self):
@@ -258,4 +258,3 @@ def outputting_asns(output_file, asn_objects):
             else:
                 writer.writerow([asn.as_number, asn.score, asn.total_ips,
                                  asn.badness, False, asn.ev_centrality])
-
