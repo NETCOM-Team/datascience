@@ -86,7 +86,7 @@ class ASN:
 
     def set_total_ips(self):
         """Setting total IPs for ASN."""
-        if self.total_ips is False or self.total_ips == 0:
+        if self.total_ips == 0:
             self.total_ips = 256
 
     def create_badness(self):
@@ -124,7 +124,7 @@ class PandasDecoder(json.JSONDecoder):
 
     def object_hook(self, obj):
         obj['events_list'] = json.loads(obj['events_list'])
-        return obj    
+        return obj
 
 
 def create_asn_graph(asn_obj_dict):
@@ -220,7 +220,7 @@ def updating_master_and_scores(master_df, asn_objects,
 
     return asn_objects
 
-#this function is for the rolling process; it will get the current list of 
+#this function is for the rolling process; it will get the current list of
 #serialized objects in redis
 def get_serialized_list(redis_instance):
     asn_objs = []
@@ -232,8 +232,8 @@ def get_serialized_list(redis_instance):
             if asn_obj_dict['events_list'] != []:
                 event_list = []
                 for i in range(0, len(asn_obj_dict['events_list'])):
-                    event_list.append(Event(asn_obj_dict['events_list'][i]['event_id'], 
-                        asn_obj_dict['events_list'][i]['ip_address'], asn_obj_dict['events_list'][i]['confidence'], 
+                    event_list.append(Event(asn_obj_dict['events_list'][i]['event_id'],
+                        asn_obj_dict['events_list'][i]['ip_address'], asn_obj_dict['events_list'][i]['confidence'],
                         asn_obj_dict['events_list'][i]['hostility'], asn_obj_dict['events_list'][i]['reputation_rating']))
 
                 asn_obj_dict['events_list'] = event_list
@@ -269,11 +269,8 @@ def set_asn_attrs(asn_obj, badness, ev_centrality, events_list, has_events, katz
 
 def creating_asns(output_path):
     """Creating ASN Objects."""
-
     redis_instance = start_redis()
-
     master_input = output_path + '/MASTER.csv'
-
     print("Creating ASN Objects")
     if os.path.exists(output_path + '/serialized_before'):
         print('getting from redis')
@@ -284,7 +281,6 @@ def creating_asns(output_path):
         print('initalizing from scratch')
         asn_objects = create_max_asn_objects()
 
-    
     asn_scores_output = output_path + '/ASN_Scores.csv'
     geolite_input = output_path + '/geolite_lookup.csv'
     geolite_df = pd.read_csv(geolite_input)
@@ -293,9 +289,6 @@ def creating_asns(output_path):
 
     asn_objects = updating_master_and_scores(master_df, asn_objects,
                                              geolite_df, master_input)
-
-    for item in asn_objects[26496].events_list:
-        print(item.__dict__)
 
     #fast_mover_asn_viz(3)
     #top_10_badness_viz(asn_objects)

@@ -22,8 +22,8 @@ def main():
         redis_instance.incr('master_version')
     else:
         redis_instance.set('master_version', 1)
-    
-    input_path = 'data/test2'
+
+    input_path = 'data/'
     output_path = 'master/'
     if not os.path.isdir(input_path):
         os.mkdir(input_path)
@@ -35,7 +35,6 @@ def main():
     ASN.Aggregating_Deepsight.creating_files(input_path, output_path)
 #    ASN.Creating_IP_ASNs.creating_ip_asn_lookups(input_path, output_path)
     ASN.Creating_ASN_Objs.creating_asns(output_path)
-#    ASN.Appending_Badness_Cleaned.append_badness()
     ASN.Creating_ASN_Objs.stop_redis(redis_instance)
     print("--- %s seconds ---" % (time.time() - start_time))
 

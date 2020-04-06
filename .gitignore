@@ -6,6 +6,7 @@ credentials
 *.rdb
 .env
 .DS_Store
-__pycache__*
+*__pycache__*
 Temp/**
 .vscode/
+.DS_Store
