@@ -9,3 +9,4 @@ credentials
 __pycache__*
 Temp/**
 .vscode/
+.DS_Store
