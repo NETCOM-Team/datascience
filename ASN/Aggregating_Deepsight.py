@@ -9,6 +9,7 @@ This is a temporary script file.
 
 import os
 import ipaddress
+import ASN
 import re
 import time
 import pandas as pd
@@ -20,6 +21,19 @@ def creating_files(input_path, output_path):
     """Creating Files."""
     print("Creating Files")
     master_output = '/MASTER.csv'
+    redis_instance = ASN.Creating_ASN_Objs.start_redis()
+    if redis_instance.exists('master_version'):
+        print('inside creating_files;')
+        master_version = int(redis_instance.get('master_version').decode('utf-8'))
+        print('master version: {}'.format(master_version))
+        print('master version type: {}'.format(type(master_version)))
+        if master_version > 1:
+            print('master version bigger than 1?: {}'.format(master_version))
+            master_output = '/MASTER' + str(master_version) + '.csv'
+            ASN.Creating_ASN_Objs.stop_redis(redis_instance)
+    else:
+        ASN.Creating_ASN_Objs.stop_redis(redis_instance)
+
     file_name = "Deepsight"
     files = []
     names_dict = {}
@@ -135,7 +149,6 @@ def resolve_asn(input_path, df):
     geo_counter = 0
     total_matches = 0
     for x in range(len(df.index)):
-#        print('IP: ', x, 'GEO: ', geo_counter)
         match = False
         while(match is False and geo_counter < len(geo_df.index) -1):
             ip_sep = df.iloc[x]['IP_List']

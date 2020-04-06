@@ -16,6 +16,7 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
+from pprint import pprint
 
 # from operator import itemgetter
 # from networkx.algorithms import community
@@ -117,6 +118,14 @@ class PandasEncoder(json.JSONEncoder):
             obj = super(PandasEncoder, self).default(obj)
         return obj
 
+class PandasDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+
+    def object_hook(self, obj):
+        obj['events_list'] = json.loads(obj['events_list'])
+        return obj
+
 
 def create_asn_graph(asn_obj_dict):
     """Creating ASN graph."""
@@ -180,8 +189,11 @@ def updating_master_and_scores(master_df, asn_objects,
                                geolite_df, master_input):
     """Updating master and scores."""
     print('Updating Master and Scores')
+    print(master_df['Confidence'])
+
     asn_chrono_score_list = []
     event_score = []
+
     for number in range(len(master_df.index)):
         as_number = master_df['ASN'][number]
         temp_event = Event(master_df['ID'][number],
@@ -189,6 +201,7 @@ def updating_master_and_scores(master_df, asn_objects,
                            master_df['Confidence'][number],
                            master_df['Hostility'][number],
                            master_df['Reputation_Rating'][number])
+
         asn_objects[as_number].events_list.append(temp_event)
         event_score.append(temp_event.create_score())
         if asn_objects[as_number].total_ips == 0:
@@ -200,29 +213,88 @@ def updating_master_and_scores(master_df, asn_objects,
         asn_chrono_score_list.append(asn_objects[as_number].badness)
 #        asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
         asn_objects[as_number].has_events = True
+
     master_df['Event_Score'] = event_score
     master_df['Historical_Score'] = asn_chrono_score_list
     master_df.to_csv(master_input)
+
     return asn_objects
 
+#this function is for the rolling process; it will get the current list of
+#serialized objects in redis
+def get_serialized_list(redis_instance):
+    asn_objs = []
+    for key in redis_instance.keys('*'):
+        try:
+            obj = redis_instance.get(key)
+            int(key.decode('utf-8'))
+            asn_obj_dict = json.loads(obj.decode(errors='ignore'), cls=PandasDecoder)
+            if asn_obj_dict['events_list'] != []:
+                event_list = []
+                for i in range(0, len(asn_obj_dict['events_list'])):
+                    event_list.append(Event(asn_obj_dict['events_list'][i]['event_id'],
+                        asn_obj_dict['events_list'][i]['ip_address'], asn_obj_dict['events_list'][i]['confidence'],
+                        asn_obj_dict['events_list'][i]['hostility'], asn_obj_dict['events_list'][i]['reputation_rating']))
+
+                asn_obj_dict['events_list'] = event_list
+
+            temp_obj = ASN(int(key.decode('utf-8')))
+            temp_obj = set_asn_attrs(temp_obj, asn_obj_dict['badness'], asn_obj_dict['ev_centrality'], asn_obj_dict['events_list'],
+                                    asn_obj_dict['has_events'], asn_obj_dict['katz_centrality'], asn_obj_dict['score'],
+                                    asn_obj_dict['total_ips'])
+            asn_objs.append(temp_obj)
+        except KeyError:
+            pass
+        except ValueError:
+            pass
+        except redis.exceptions.ResponseError:
+            pass
+        except AttributeError:
+            pass
+
+    print('done deserializing')
+    asn_objs = sorted(asn_objs, key=lambda x: x.as_number)
+    return asn_objs
+
+
+def set_asn_attrs(asn_obj, badness, ev_centrality, events_list, has_events, katz_centrality, score, total_ips):
+    asn_obj.badness = badness
+    asn_obj.ev_centrality = ev_centrality
+    asn_obj.events_list = events_list
+    asn_obj.has_events = has_events
+    asn_obj.katz_centrality = katz_centrality
+    asn_obj.score = score
+    asn_obj.total_ips = total_ips
+    return asn_obj
 
 def creating_asns(output_path):
     """Creating ASN Objects."""
+    redis_instance = start_redis()
+    master_input = output_path + '/MASTER.csv'
     print("Creating ASN Objects")
+    if os.path.exists(output_path + '/serialized_before'):
+        print('getting from redis')
+        asn_objects = get_serialized_list(redis_instance)
+        master_input = output_path + 'MASTER'+ redis_instance.get('master_version').decode('utf-8') + '.csv'
+        print('NEW MASTER: {}'.format(master_input))
+    else:
+        print('initalizing from scratch')
+        asn_objects = create_max_asn_objects()
+
     asn_scores_output = output_path + '/ASN_Scores.csv'
     geolite_input = output_path + '/geolite_lookup.csv'
-    master_input = output_path + '/MASTER.csv'
-    asn_objects = create_max_asn_objects()
     geolite_df = pd.read_csv(geolite_input)
     master_df = pd.read_csv(master_input, low_memory=False)
     master_df.sort_values(by=['ASN', 'Source_Date'], inplace=True)
+
     asn_objects = updating_master_and_scores(master_df, asn_objects,
                                              geolite_df, master_input)
-    print('about to visualize')
+
     #fast_mover_asn_viz(3)
     #top_10_badness_viz(asn_objects)
-    creating_asn_evs(asn_objects)
+    #creating_asn_evs(asn_objects)
     outputting_asns(asn_scores_output, asn_objects)
+    create_marker_serialized(output_path)
 
 
 def creating_asn_evs(asn_objects):
@@ -244,8 +316,13 @@ def creating_asn_evs(asn_objects):
 
 def outputting_asns(output_file, asn_objects):
     """Outputting ASN Scores."""
-    redis_host = os.getenv('REDIS_HOST')
-    redis_instance = redis.Redis(host=redis_host, port=6379)
+
+    # for item in asn_objects:
+    #     if item.as_number == 26496:
+    #         for item in item.events_list:
+    #             pprint(item.__dict__)
+
+    redis_instance = start_redis()
     with open(output_file, 'w') as file:
         writer = csv.writer(file)
         writer.writerow(['ASN', 'Score', 'Total_IPs',
@@ -258,3 +335,19 @@ def outputting_asns(output_file, asn_objects):
             else:
                 writer.writerow([asn.as_number, asn.score, asn.total_ips,
                                  asn.badness, False, asn.ev_centrality])
+
+
+#this function will create a file at the end of outputting asn_s as a marker
+#that the second time around, we will be incorporating the new asn's in to the rolling process
+#and not creating them from scratch
+def create_marker_serialized(output_path):
+    with open(output_path + '/serialized_before', 'w') as f:
+        f.write('objects serialized before, this is a new ingest, rolling process')
+
+def start_redis():
+    #redis_host = os.getenv('REDIS_HOST')
+    redis_instance = redis.StrictRedis(host='localhost', port=6379)
+    return redis_instance
+
+def stop_redis(redis_instance):
+    redis_instance.connection_pool.disconnect()

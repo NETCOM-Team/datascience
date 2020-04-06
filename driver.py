@@ -16,6 +16,13 @@ import ASN
 def main():
     """Driver function for ASN Program"""
     start_time = time.time()
+
+    redis_instance = ASN.Creating_ASN_Objs.start_redis()
+    if os.path.exists('master/serialized_before'):
+        redis_instance.incr('master_version')
+    else:
+        redis_instance.set('master_version', 1)
+
     input_path = 'data/'
     output_path = 'master/'
     if not os.path.isdir(input_path):
@@ -28,6 +35,7 @@ def main():
     ASN.Aggregating_Deepsight.creating_files(input_path, output_path)
 #    ASN.Creating_IP_ASNs.creating_ip_asn_lookups(input_path, output_path)
     ASN.Creating_ASN_Objs.creating_asns(output_path)
+    ASN.Creating_ASN_Objs.stop_redis(redis_instance)
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
