@@ -10,4 +10,4 @@ credentials
 Temp/**
 .vscode/
 .DS_Store
-!data/geolite.csv
+!data/geolite_original.csv
