@@ -21,7 +21,7 @@ def creating_files(input_path, output_path):
     """Creating Files."""
     print("Creating Files")
     master_output = '/MASTER.csv'
-    redis_instance = ASN.Creating_ASN_Objs.start_redis()
+    redis_instance = ASN.creating_asn_objects.start_redis()
     if redis_instance.exists('master_version'):
         print('inside creating_files;')
         master_version = int(redis_instance.get('master_version').decode('utf-8'))
@@ -30,9 +30,9 @@ def creating_files(input_path, output_path):
         if master_version > 1:
             print('master version bigger than 1?: {}'.format(master_version))
             master_output = '/MASTER' + str(master_version) + '.csv'
-            ASN.Creating_ASN_Objs.stop_redis(redis_instance)
+            ASN.creating_asn_objects.stop_redis(redis_instance)
     else:
-        ASN.Creating_ASN_Objs.stop_redis(redis_instance)
+        ASN.creating_asn_objects.stop_redis(redis_instance)
 
     file_name = "Deepsight"
     files = []
@@ -142,7 +142,7 @@ def dropping_multiple_ips_asns(input_path, df):
 def resolve_asn(input_path, df):
     """Resolving the ASN when it is Zero"""
     print('Resolving ASN')
-    geo_path = input_path + '/geolite3.csv'
+    geo_path = input_path + '/geolite_ordered.csv'
     geo_df = pd.read_csv(geo_path)
     df = sorting_by_address(df)
     print('Back to resolving')
