@@ -15,7 +15,7 @@ def main():
     """Main Function for creating CIDRs."""
     start_time = time.time()
     input_path = '../data'
-    input_path = input_path + '/geolite.csv'
+    input_path = input_path + '/geolite_original.csv'
     geo_df = pd.read_csv(input_path)
     last_hosts_list = []
     drop_set = set()
