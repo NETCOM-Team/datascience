@@ -18,17 +18,14 @@ def creating_ip_asn_lookups(input_path, output_path):
 
 def create_geolite_lookup(input_path, output_path):
     """Creating Geolite csv to find IP/ASN mapping"""
-    print("Creating Geolite Whois")
+    print("Creating Geolite Lookup")
     max_asn = 600000
-    geolite_input_file = input_path + 'geolite.csv'
+    geolite_input_file = input_path + 'geolite_original.csv'
     geolite_output_file = output_path + 'geolite_lookup.csv'
-    print(geolite_input_file)
-    print(geolite_output_file)
     geo_df = pd.read_csv(geolite_input_file)
     geo_df = geo_df.drop(geo_df.columns[[0, 1, 4]], axis=1)
     geo_df = geo_df[geo_df.ASN != '-']
     geo_df = geo_df.astype({'ASN': int})
-    print(geo_df.head())
     geo_df.sort_values(by='ASN', inplace=True)
     asn_list = []
     for number in range(0, max_asn):
@@ -36,7 +33,6 @@ def create_geolite_lookup(input_path, output_path):
     current_asn = 0
     current_ip_total = 0
     for index, row in geo_df.iterrows():
-        # print(row['IP_CIDR'], type(row['ASN']))
         if int(row['ASN']) == current_asn:
             current_ip_total += ipaddress.ip_network(row['IP_CIDR']).num_addresses
         else:

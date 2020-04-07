@@ -16,8 +16,6 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-from pprint import pprint
-
 # from operator import itemgetter
 # from networkx.algorithms import community
 
@@ -127,6 +125,36 @@ class PandasDecoder(json.JSONDecoder):
         return obj
 
 
+def creating_asns(output_path):
+    """Creating ASN Objects."""
+    redis_instance = start_redis()
+    master_input = output_path + '/MASTER.csv'
+    print("Creating ASN Objects")
+    if os.path.exists(output_path + '/serialized_before'):
+        print('getting from redis')
+        asn_objects = get_serialized_list(redis_instance)
+        master_input = output_path + 'MASTER'+ redis_instance.get('master_version').decode('utf-8') + '.csv'
+        print('NEW MASTER: {}'.format(master_input))
+    else:
+        print('initalizing from scratch')
+        asn_objects = create_max_asn_objects()
+
+    asn_scores_output = output_path + '/ASN_Scores.csv'
+    geolite_input = output_path + '/geolite_lookup.csv'
+    geolite_df = pd.read_csv(geolite_input)
+    master_df = pd.read_csv(master_input, low_memory=False)
+    master_df.sort_values(by=['ASN', 'Source_Date'], inplace=True)
+
+    asn_objects = updating_master_and_scores(master_df, asn_objects,
+                                             geolite_df, master_input)
+
+    #fast_mover_asn_viz(3)
+    #top_10_badness_viz(asn_objects)
+    #creating_asn_evs(asn_objects)
+    outputting_asns(asn_scores_output, asn_objects)
+    create_marker_serialized(output_path)
+
+
 def create_asn_graph(asn_obj_dict):
     """Creating ASN graph."""
     graph = nx.Graph()
@@ -189,8 +217,6 @@ def updating_master_and_scores(master_df, asn_objects,
                                geolite_df, master_input):
     """Updating master and scores."""
     print('Updating Master and Scores')
-    print(master_df['Confidence'])
-
     asn_chrono_score_list = []
     event_score = []
 
@@ -267,34 +293,7 @@ def set_asn_attrs(asn_obj, badness, ev_centrality, events_list, has_events, katz
     asn_obj.total_ips = total_ips
     return asn_obj
 
-def creating_asns(output_path):
-    """Creating ASN Objects."""
-    redis_instance = start_redis()
-    master_input = output_path + '/MASTER.csv'
-    print("Creating ASN Objects")
-    if os.path.exists(output_path + '/serialized_before'):
-        print('getting from redis')
-        asn_objects = get_serialized_list(redis_instance)
-        master_input = output_path + 'MASTER'+ redis_instance.get('master_version').decode('utf-8') + '.csv'
-        print('NEW MASTER: {}'.format(master_input))
-    else:
-        print('initalizing from scratch')
-        asn_objects = create_max_asn_objects()
 
-    asn_scores_output = output_path + '/ASN_Scores.csv'
-    geolite_input = output_path + '/geolite_lookup.csv'
-    geolite_df = pd.read_csv(geolite_input)
-    master_df = pd.read_csv(master_input, low_memory=False)
-    master_df.sort_values(by=['ASN', 'Source_Date'], inplace=True)
-
-    asn_objects = updating_master_and_scores(master_df, asn_objects,
-                                             geolite_df, master_input)
-
-    #fast_mover_asn_viz(3)
-    #top_10_badness_viz(asn_objects)
-    #creating_asn_evs(asn_objects)
-    outputting_asns(asn_scores_output, asn_objects)
-    create_marker_serialized(output_path)
 
 
 def creating_asn_evs(asn_objects):

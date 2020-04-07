@@ -11,15 +11,13 @@ import time
 import pandas as pd
 
 
-def main():
+def cleaning_geolite(input_path):
     """Main Function for creating CIDRs."""
     start_time = time.time()
-    input_path = '../data'
-    input_path = input_path + '/geolite_original.csv'
-    geo_df = pd.read_csv(input_path)
+    geo_input_path = input_path + 'geolite_original.csv'
+    geo_df = pd.read_csv(geo_input_path)
     last_hosts_list = []
     drop_set = set()
-    print('A')
     for number in range(len(geo_df.index)):
         if geo_df['ASN'][number] == '-':
             drop_set.add(number)
@@ -31,17 +29,12 @@ def main():
 #        all_hosts = list(n.hosts())
         last_hosts_list.append(network[-1])
     ips_separated = []
-    print('B')
     for ip in last_hosts_list:
         temp_list = str(ip).split('.')
         for place in range(0, 4):
             temp_list[place] = int(temp_list[place])
         ips_separated.append(temp_list)
     geo_df['IP_List'] = ips_separated
-    print('C')
     geo_df.sort_values(by=['IP_List'], inplace=True)
-    geo_df.to_csv('../Temp/geolite3.csv')
+    geo_df.to_csv(input_path + 'geolite_ordered.csv')
     print("--- %s seconds ---" % (time.time() - start_time))
-
-
-main()
