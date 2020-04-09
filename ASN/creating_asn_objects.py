@@ -1,29 +1,51 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Mon Feb  3 14:08:22 2020
-
 @author: jacksonbrietzke
 @author: rajsingh
 """
 
+
+""" This file defines the classes for Events and ASN Objects
+    Various functionality to perform operations on events and the 
+    ASN objects is also provided. Each event represents one row in the
+    Symantec deepsight data and each ASN object can have multiple
+    events. 
+"""
+
 import json
 import csv
-# import ast
 import os
 import redis
 import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-# from operator import itemgetter
-# from networkx.algorithms import community
-
-# Event class for each entry in Datafeed
-
 
 class Event:
-    """Creating Class Events for ASN objects."""
+    
+    """ 
+    A class used to represent a threat event, or a row in the Symantec data feeds.
+    All of the attributes listed here are not all of the attributes in the data feeds. 
+
+    Attributes
+    ----------
+    event_id : str
+        a string representing the threat event's ID
+    ip_address : str
+        the IP address associated with the event
+    confidence : str
+        the confidence rating of the event
+    hostility : int
+        the hostility rating of the event
+    reputation_rating: int
+        the reputation rating of the event.
+
+    Methods
+    -------
+    create_score(self) -> int
+        Returns the score of the event; the score represents a weighting
+        which gives us an idea of how "bad" the event is
+    """
+
     def __init__(self, event_id, ip_address, confidence,
                  hostility, reputation_rating):
         self.event_id = event_id
@@ -42,7 +64,7 @@ class Event:
             self.reputation_rating = 0
         self.score = self.create_score()
 
-    def create_score(self):
+    def create_score(self) -> float:
         """Creating Score for Event."""
         temp_score = self.hostility + self.confidence + self.reputation_rating
         if self.hostility == 0:
@@ -51,11 +73,50 @@ class Event:
             temp_score = temp_score / 20
         return temp_score
 
-# ASN object to use for future work
-
 
 class ASN:
-    """Creating ASN Class."""
+
+    """ 
+    A class used to represent an ASN object.
+    An ASN object is compromised of multiple Events and other
+    attributes we'ved added for our analysis.
+
+    Attributes
+    ----------
+    as_number : str
+        The ASN number
+    events_list : list
+        The list of Event objects that an ASN has.
+    score : float
+        the score of the ASN (sum of all event scores)
+    total_ips : int
+        total number of IP's in the ASN
+    badness: float
+        the badness rating of the ASN.
+    has_events: bool
+        Signifies whether or not the ASN's events list is empty
+    ev_centrality: float
+        marks the ASN's eigenvector centrality
+
+    Methods
+    -------
+    given_asn(cls, as_number) -> cls
+        Initializes an instance of the ASN object with the given ASN number
+    create_score(self) -> int
+        Returns the score of the event; the score represents a weighting
+        which gives us an idea of how "bad" the event is
+    set_total_ips(self):
+        initializes the number of IP's in the ASN
+    create_badness(self):
+        sets the badness score of the ASN
+    set_ev_centrality(self, ev_centrality):
+        sets the eigenvector centrality of the ASN object with respect
+        to other objects in the graph
+    serialize_asn(asn_obj)
+        static method with serializes an ASN objects (which is a complex object)
+        for storage in, say, a database
+    """
+
     def __init__(self, as_number):
         """Initializing Instance."""
         try:
@@ -68,10 +129,9 @@ class ASN:
         self.badness = 0
         self.has_events = False
         self.ev_centrality = 0
-        self.katz_centrality = 0
 
     @classmethod
-    def given_asn(cls, as_number):
+    def given_asn(cls, as_number: int) -> object:
         """Initializing Instance with ASN."""
         return cls(as_number)
 
@@ -91,12 +151,12 @@ class ASN:
         """Creating badness score for ASN."""
         self.badness = self.score / self.total_ips
 
-    def set_ev_centrality(self, ev_centrality):
+    def set_ev_centrality(self, ev_centrality: tuple):
         """Setting EV Centrality for ASN."""
         self.ev_centrality = ev_centrality[1]
 
     @staticmethod
-    def serialize_asn(asn_obj):
+    def serialize_asn(asn_obj: object) -> str:
         """Static method for Serializing ASN."""
         serialized_events = []
         for event in asn_obj.events_list:
@@ -104,10 +164,40 @@ class ASN:
         asn_obj.events_list = json.dumps(serialized_events)
         return json.dumps(asn_obj.__dict__, sort_keys=True, cls=PandasEncoder)
 
+    @staticmethod
+    def set_asn_attrs(asn_obj: object, badness: float, ev_centrality: float, events_list: list, 
+                      has_events: bool, katz_centrality: float, score: float, total_ips: int) -> object:
+        
+        """sets the attributes of an ASN object"""
+        asn_obj.badness = badness
+        asn_obj.ev_centrality = ev_centrality
+        asn_obj.events_list = events_list
+        asn_obj.has_events = has_events
+        asn_obj.katz_centrality = katz_centrality
+        asn_obj.score = score
+        asn_obj.total_ips = total_ips
+        return asn_obj
+
 
 class PandasEncoder(json.JSONEncoder):
+    """ 
+    This is a class which encodes Pandas objects for serialization.
+    Redis doesn't like storing Numpy integers, so this class encodes
+    them as normal data types for storage in the Redis db
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    default(self, obj)
+        returns the custom encoding of the object with the storable
+        data types
+    """
+
     """Custom encoder for Redis."""
-    def default(self, obj):
+    def default(self, obj: object) -> object:
         if isinstance(obj, np.int64):
             obj = int(obj)
         elif isinstance(obj, np.float64):
@@ -117,15 +207,42 @@ class PandasEncoder(json.JSONEncoder):
         return obj
 
 class PandasDecoder(json.JSONDecoder):
+    
+    """
+    This is a class which decodes the custom encoding specified in
+    PandasEncoder.
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    object_hook(self, obj) -> obj
+        returns the custom encoding of the object with the storable
+        data types
+    """
+    
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
-    def object_hook(self, obj):
+    def object_hook(self, obj: object) -> object:
         obj['events_list'] = json.loads(obj['events_list'])
         return obj
 
 
-def creating_asns(output_path):
+""" Creates the ASN objects from the threat intelligence data. New objects are initialized
+    if this is the first time 'driver.py' is being run, otherwise the existing objects
+    stored in the redis database are pulled to be updated. This function also writes the output
+    to ASN_Scores.csv and MASTER.csv 
+
+Args
+-----
+    output_path (str): The output path which signifies where the aggregated MASTER.csv
+    and ASN_Scores.csv will be placed
+        
+"""
+def creating_asns(output_path: str):
     """Creating ASN Objects."""
     redis_instance = start_redis()
     master_input = output_path + '/MASTER.csv'
@@ -155,10 +272,23 @@ def creating_asns(output_path):
     create_marker_serialized(output_path)
 
 
-def create_asn_graph(asn_obj_dict):
+""" Creates a directed graph of ASN objects. Nodes are asn numbers and ip addresses.
+    This is useful for doing graph based analysis; we use it for calculating
+    eigenvector centrality of ASNs.
+
+Args
+-----
+    asn_obj_list (list): The list of ASN objects to construct the graph
+
+Returns
+-------
+    graph (nx.Graph): the directed graph of ASN objects / IP addresses
+        
+"""
+def create_asn_graph(asn_obj_list: list) -> nx.Graph():
     """Creating ASN graph."""
     graph = nx.Graph()
-    for obj in asn_obj_dict:
+    for obj in asn_obj_list:
         graph.add_node(obj.as_number)
         for event in obj.events_list:
             graph.add_node(event.ip_address)
@@ -166,7 +296,19 @@ def create_asn_graph(asn_obj_dict):
     return graph
 
 
-def get_eigenvector_centrality(centrality_struct):
+""" Gets a list of eigenvector centrality values from a directed graph
+
+Args
+-----
+    centrality_struct (dict): The dictionary containing information about the eigenvector
+                              centrality of the nodes
+
+Returns
+-------
+    graph (nx.Graph): the directed graph of ASN objects / IP addresses
+        
+"""
+def get_eigenvector_centrality(centrality_struct: dict) -> list:
     """Getting the Eigenvector Centraility."""
     ints = []
     for tup in centrality_struct.items():
@@ -175,7 +317,14 @@ def get_eigenvector_centrality(centrality_struct):
     return ints
 
 
-def top_10_badness_viz(asn_obj_dict):
+""" Displays a visual showing the top 10 ASN's by badness score
+
+Args
+-----
+    asn_object_dict: the list of ASN objects to generate the visual from
+
+"""
+def top_10_badness_viz(asn_obj_dict: dict):
     newlist = sorted(asn_obj_dict, key=lambda x: x.badness, reverse=True)
     top_10 = newlist[:10]
     asn_nums = []
@@ -191,7 +340,14 @@ def top_10_badness_viz(asn_obj_dict):
     plt.show()
 
 
-def fast_mover_asn_viz(asn_number):
+""" Displays a visual showing how much more 'bad' an ASN has been getting
+    according to historical badness
+Args
+-----
+    asn_number: the list of ASN objects to generate the visual from
+
+"""
+def fast_mover_asn_viz(asn_number: int):
     df = pd.read_csv('master/MASTER.csv')
     df = df.loc[df['ASN'] == asn_number]
     dates = [x[0:10] for x in df['Source_Date']]
@@ -204,7 +360,14 @@ def fast_mover_asn_viz(asn_number):
     plt.show()
 
 
-def create_max_asn_objects():
+""" initializes 600k ASN objects from scratch, used the first time
+    'driver.py' is run
+
+Returns
+-------
+    asn_list (list): the list of freshly initialized ASN objects
+"""
+def create_max_asn_objects() -> list:
     """Creating Max ASN Objects"""
     max_range = 600000
     asn_list = []
@@ -212,9 +375,19 @@ def create_max_asn_objects():
         asn_list.append(ASN(number))
     return asn_list
 
+""" Updates existing ASN objects and outputs a new MASTER
 
-def updating_master_and_scores(master_df, asn_objects,
-                               geolite_df, master_input):
+Args
+-----
+    master_df (pd.DataFrame): the MASTER data frame to update and write out
+    asn_objects (list): the list of ASN objects being updated and being used to
+                        update MASTER
+    geolite_df (pd.DataFrame): the geolite database used to update IP information about
+                                ASN objects
+    master_input (str): the path to write the new MASTER to
+"""
+def updating_master_and_scores(master_df: pd.DataFrame, asn_objects: list,
+                               geolite_df: pd.DataFrame, master_input: str) -> list:
     """Updating master and scores."""
     print('Updating Master and Scores')
     asn_chrono_score_list = []
@@ -237,7 +410,6 @@ def updating_master_and_scores(master_df, asn_objects,
         asn_objects[as_number].create_score()
         asn_objects[as_number].create_badness()
         asn_chrono_score_list.append(asn_objects[as_number].badness)
-#        asn_objects[master_df['ASN'][x]].events_list.append(temp_event)
         asn_objects[as_number].has_events = True
 
     master_df['Event_Score'] = event_score
@@ -246,14 +418,26 @@ def updating_master_and_scores(master_df, asn_objects,
 
     return asn_objects
 
-#this function is for the rolling process; it will get the current list of
-#serialized objects in redis
-def get_serialized_list(redis_instance):
+""" This function pulls down a list of serialized ASN objects from a Redis database
+    and deserializes them (for use in the other functions in this file)
+
+Args
+-----
+    master_df (pd.DataFrame): the MASTER data frame to update and write out
+    asn_objects (list): the list of ASN objects being updated and being used to
+                        update MASTER
+    geolite_df (pd.DataFrame): the geolite database used to update IP information about
+                                ASN objects
+    master_input (str): the path to write the new MASTER to
+"""
+def get_serialized_list(redis_instance: redis.StrictRedis) -> list:
     asn_objs = []
+    """loop through keys in database to get objects"""
     for key in redis_instance.keys('*'):
         try:
             obj = redis_instance.get(key)
             int(key.decode('utf-8'))
+            """deserialize object, next have to deserialize list of event objects"""
             asn_obj_dict = json.loads(obj.decode(errors='ignore'), cls=PandasDecoder)
             if asn_obj_dict['events_list'] != []:
                 event_list = []
@@ -265,7 +449,7 @@ def get_serialized_list(redis_instance):
                 asn_obj_dict['events_list'] = event_list
 
             temp_obj = ASN(int(key.decode('utf-8')))
-            temp_obj = set_asn_attrs(temp_obj, asn_obj_dict['badness'], asn_obj_dict['ev_centrality'], asn_obj_dict['events_list'],
+            temp_obj = ASN.set_asn_attrs(temp_obj, asn_obj_dict['badness'], asn_obj_dict['ev_centrality'], asn_obj_dict['events_list'],
                                     asn_obj_dict['has_events'], asn_obj_dict['katz_centrality'], asn_obj_dict['score'],
                                     asn_obj_dict['total_ips'])
             asn_objs.append(temp_obj)
@@ -282,21 +466,16 @@ def get_serialized_list(redis_instance):
     asn_objs = sorted(asn_objs, key=lambda x: x.as_number)
     return asn_objs
 
+""" This function creates the ASN graph, gets the eigenvector centralities
+    and assigns those values to the attributes in the ASN objecs
 
-def set_asn_attrs(asn_obj, badness, ev_centrality, events_list, has_events, katz_centrality, score, total_ips):
-    asn_obj.badness = badness
-    asn_obj.ev_centrality = ev_centrality
-    asn_obj.events_list = events_list
-    asn_obj.has_events = has_events
-    asn_obj.katz_centrality = katz_centrality
-    asn_obj.score = score
-    asn_obj.total_ips = total_ips
-    return asn_obj
-
-
-
-
-def creating_asn_evs(asn_objects):
+Args
+-----
+    
+    asn_objects (list): the list of ASN objects being whose EV centralities
+                        are being set
+"""
+def creating_asn_evs(asn_objects: list):
     """Creating ASN EVs"""
     print('Getting eigenvector centrality')
     event_objects = []
@@ -312,15 +491,16 @@ def creating_asn_evs(asn_objects):
         obj.set_ev_centrality(asn_ev_centralities[i])
         i += 1
 
+""" writes the updated output to ASN_Scores
 
-def outputting_asns(output_file, asn_objects):
+Args
+-----
+    output_file (str): directory to write output to
+    asn_objects (list): the list of ASN objects being whose EV centralities
+                        are being set
+"""
+def outputting_asns(output_file: str, asn_objects: list):
     """Outputting ASN Scores."""
-
-    # for item in asn_objects:
-    #     if item.as_number == 26496:
-    #         for item in item.events_list:
-    #             pprint(item.__dict__)
-
     redis_instance = start_redis()
     with open(output_file, 'w') as file:
         writer = csv.writer(file)
@@ -336,17 +516,34 @@ def outputting_asns(output_file, asn_objects):
                                  asn.badness, False, asn.ev_centrality])
 
 
-#this function will create a file at the end of outputting asn_s as a marker
-#that the second time around, we will be incorporating the new asn's in to the rolling process
-#and not creating them from scratch
+""" writes out a file which signifies that the current run of driver was 
+    a rolling ingest
+
+Args
+-----
+    output_path (str): directory to write the marker file to 
+    
+"""
 def create_marker_serialized(output_path):
     with open(output_path + '/serialized_before', 'w') as f:
         f.write('objects serialized before, this is a new ingest, rolling process')
 
-def start_redis():
+""" starts a StrictRedis instance
+
+Returns
+--------
+    redis_instance (redis.StrictRedis): the initialized Redis DB instance
+"""
+def start_redis() -> redis.StrictRedis:
     #redis_host = os.getenv('REDIS_HOST')
     redis_instance = redis.StrictRedis(host='localhost', port=6379)
     return redis_instance
 
+""" stops a StrictRedis instance
+
+Args
+--------
+    redis_instance (redis.StrictRedis): the StrictRedis instance to disconnect from
+"""
 def stop_redis(redis_instance):
     redis_instance.connection_pool.disconnect()

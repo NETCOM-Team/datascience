@@ -1,17 +1,20 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Thu Feb 13 19:16:08 2020
-
 @author jacksonbrietzke
 @author: rajsingh
 """
 
-import ast
+""" This file appends the column with badness scores to the  MASTER_Badness.csv file 
 
+"""
+
+
+import ast
 import pandas as pd
 
+""" reads the MASTER file and the ASN Scores file and takes the badness scores from MASTER
+    and appends them as a column to MASTER_Badness
 
+"""
 def append_badness():
     """Appending Badness"""
     print("Appending to cleaned")
@@ -22,12 +25,12 @@ def append_badness():
     badness_list = []
     event_score_list = []
     ev_centrality_list = []
-    for index, row in master_df.iterrows():
+    for row in master_df.iterrows():
         badness_list.append(asn_score_df['Badness'][row['ASN']])
+        """ast.literal_eval used because values are stored as strings of tuples"""
         ev_centrality_list.append(ast.literal_eval(
             str(asn_score_df['EV Centrality'][row['ASN']]))[1])
         badness_list.append(asn_score_df['Badness'][row['ASN']])
-#        print(type(row['Hostility']))
         if row['Hostility'] > 0:
             event_score = (row['Confidence']
                            + row['Hostility']

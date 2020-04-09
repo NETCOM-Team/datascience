@@ -1,9 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Tue Feb 18 01:15:43 2020
 
 @author: jacksonbrietzke
+"""
+
+""" Cleans the geolite database and translates IP addresses to CIDR notation for visualization use
+
 """
 
 import ipaddress
@@ -11,7 +13,13 @@ import time
 import pandas as pd
 
 
-def cleaning_geolite(input_path):
+""" Reads the geolite database and creates CIDR notation IP addresses for visualizations purposes
+
+Args
+-------
+    input_path (str): the path to the geolite database
+"""
+def cleaning_geolite(input_path: str):
     """Main Function for creating CIDRs."""
     start_time = time.time()
     geo_input_path = input_path + 'geolite_original.csv'
@@ -22,11 +30,8 @@ def cleaning_geolite(input_path):
         if geo_df['ASN'][number] == '-':
             drop_set.add(number)
     geo_df.drop(drop_set, inplace=True)
-    for index, row in geo_df.iterrows():
-        #        n = ipaddress.IPv4Network('10.10.128.0/17')
-        #        first, last = n[0], n[-1]
+    for row in geo_df.iterrows():
         network = ipaddress.ip_network(row['IP_CIDR'])
-#        all_hosts = list(n.hosts())
         last_hosts_list.append(network[-1])
     ips_separated = []
     for ip in last_hosts_list:
