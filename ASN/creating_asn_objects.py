@@ -536,7 +536,7 @@ Returns
 """
 def start_redis() -> redis.StrictRedis:
     #redis_host = os.getenv('REDIS_HOST')
-    redis_instance = redis.StrictRedis(host='localhost', port=6379)
+    redis_instance = redis.StrictRedis(host='redis', port=6379)
     return redis_instance
 
 """ stops a StrictRedis instance
