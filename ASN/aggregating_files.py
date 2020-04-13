@@ -14,15 +14,16 @@ import ipaddress
 import re
 import time
 import pandas as pd
+import ASN
 
 """ Aggregates the Deepsight data and outputs the new MASTER.csv (or MASTER2, MASTER3, ... , MASTERn.csv)
-    based on how many times this program has been run (n) as part of the rolling ingestion process. 
+    based on how many times this program has been run (n) as part of the rolling ingestion process.
 
 Args
 -----
     input_path (str): The input path of the Deepsight files to aggregate
     output_path (str): The output path which signifies where the aggregated MASTER.csv will be placed
-        
+
 """
 def creating_files(input_path: str, output_path: str):
     """Creating Files."""
@@ -49,8 +50,8 @@ def creating_files(input_path: str, output_path: str):
     c_size = 1000
 
     """ open the data fields and names dict; data_fields.txt signifies
-        the naming convention of the columns in the original files and 
-        names_dict.txt will be what they will be renamed to (so that 
+        the naming convention of the columns in the original files and
+        names_dict.txt will be what they will be renamed to (so that
         they are easier to understand and work with"""
     with open(input_path + 'data_fields.txt') as file:
         data_fields = file.read().splitlines()
@@ -59,7 +60,7 @@ def creating_files(input_path: str, output_path: str):
             (key, value) = line.split(':')
             names_dict[str(key)] = value.rstrip()
     files = get_files(input_path, file_name)
-    """ create master df, resolve ASN's, rearrange df, 
+    """ create master df, resolve ASN's, rearrange df,
         and output to MASTER(1..n).csv
     """
     master_df = create_master_df(input_path,
@@ -73,7 +74,7 @@ def creating_files(input_path: str, output_path: str):
     master_df.to_csv(output_path + master_output)
 
 """ This function collects the Deepsight files and returns a list of all of them
-    with newly named and parsed columns. 
+    with newly named and parsed columns.
 
 Args
 -------
@@ -117,12 +118,12 @@ def changing_line(given_file: str, input_path: str):
     with open(input_path + given_file, 'w')as file:
         file.write('\n'.join(lines))
 
-""" This function creates the new, renamed MASTER dataframe by reading it in 
+""" This function creates the new, renamed MASTER dataframe by reading it in
     chunks at a time
 
 Args
 -------
-    input_path (str): The path to the MASTER dataframe 
+    input_path (str): The path to the MASTER dataframe
     files (list): the list of files to condense into MASTER
     c_size (int): the size of the chunks
     data_fields (list): column names
@@ -147,9 +148,9 @@ def create_master_df(input_path: str, files: list,
     return df
 
 """ This function drops multiple IP / ASN entries. For example,
-    if an event doesn't have an IP, it gets dropped. If the ASN is 
+    if an event doesn't have an IP, it gets dropped. If the ASN is
     out of range, it gets dropped, etc. It returns a data frame with
-    only valid, resolved ASNs (using resolve_asn) sorted by date and 
+    only valid, resolved ASNs (using resolve_asn) sorted by date and
     ASN number
 
 Args

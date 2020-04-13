@@ -4,13 +4,13 @@
 import ipaddress
 import pandas as pd
 
-""" 
+"""
     This file looks up which IPs are in which ASN's and outputs them to geolite_lookup.csv
 """
 
 """ driver function for creating the geolite lookup
 
-Args 
+Args
 -------
     input_path (str): the path to the original Geolite database file
     output_path (str): the path to output the new Geolite look with less columns for our use
@@ -22,10 +22,10 @@ def creating_ip_asn_lookups(input_path: str, output_path: str):
     create_geolite_lookup(input_path, output_path)
 
 
-""" Uses the Geolite database to lookup which IP's belong to which ASN's 
+""" Uses the Geolite database to lookup which IP's belong to which ASN's
 
 
-Args 
+Args
 -------
     input_path (str): the path to the original Geolite database file
     output_path (str): the path to output the new Geolite look with less columns for our use
@@ -47,7 +47,7 @@ def create_geolite_lookup(input_path: str , output_path: str):
         asn_list.append([number, 0])
     current_asn = 0
     current_ip_total = 0
-    for row in geo_df.iterrows():
+    for index, row in geo_df.iterrows():
         if int(row['ASN']) == current_asn:
             current_ip_total += ipaddress.ip_network(row['IP_CIDR']).num_addresses
         else:

@@ -30,7 +30,7 @@ def cleaning_geolite(input_path: str):
         if geo_df['ASN'][number] == '-':
             drop_set.add(number)
     geo_df.drop(drop_set, inplace=True)
-    for row in geo_df.iterrows():
+    for index, row in geo_df.iterrows():
         network = ipaddress.ip_network(row['IP_CIDR'])
         last_hosts_list.append(network[-1])
     ips_separated = []

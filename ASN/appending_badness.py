@@ -3,7 +3,7 @@
 @author: rajsingh
 """
 
-""" This file appends the column with badness scores to the  MASTER_Badness.csv file 
+""" This file appends the column with badness scores to the  MASTER_Badness.csv file
 
 """
 
@@ -25,7 +25,7 @@ def append_badness():
     badness_list = []
     event_score_list = []
     ev_centrality_list = []
-    for row in master_df.iterrows():
+    for index, row in master_df.iterrows():
         badness_list.append(asn_score_df['Badness'][row['ASN']])
         """ast.literal_eval used because values are stored as strings of tuples"""
         ev_centrality_list.append(ast.literal_eval(
