@@ -4,11 +4,11 @@ services:
     build:
       context: .
       dockerfile: django/redis_demo/django_redis_demo/Dockerfile
-    command: bash -c "python django/redis_demo/django_redis_demo/manage.py makemigrations && python django/redis_demo/django_redis_demo/manage.py migrate && cd django/redis_demo/django_redis_demo/ && gunicorn django_redis_demo.wsgi"
+    command: bash -c "python django/redis_demo/django_redis_demo/manage.py makemigrations && python django/redis_demo/django_redis_demo/manage.py migrate && cd django/redis_demo/django_redis_demo/ && gunicorn django_redis_demo.wsgi --bind 0.0.0.0:8000"
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - "8000:8000"  
     depends_on:
       - redis
   app:
@@ -29,5 +29,11 @@ services:
       - redis_data:/data
     ports:
       - "6379:6379"
+  nginx:
+    build: ./nginx
+    ports:
+      - "1337:80"
+    depends_on:
+      - api
 volumes:
   redis_data:
