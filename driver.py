@@ -8,7 +8,7 @@ Created on Tue Feb 11 09:52:06 2020
 
 """
 
-""" This is the driver program for all of the Python scripts; it calls all of the necessary 
+""" This is the driver program for all of the Python scripts; it calls all of the necessary
     functions to aggregate, clean, and reformat all of the Deepsight data that is ingested
     and it also creates the ASN objects and uses them for various analyses
 """
@@ -30,7 +30,7 @@ def main():
     redis_instance = setup_redis()
     setup_directories(input_path, output_path)
     ASN.aggregating_files.creating_files(input_path, output_path)
-    ASN.creating_asn_objects.creating_asns(output_path)
+    ASN.creating_asn_objects.creating_asns(output_path, input_path)
     ASN.creating_asn_objects.stop_redis(redis_instance)
     print("--- %s seconds ---" % (time.time() - start_time))
 

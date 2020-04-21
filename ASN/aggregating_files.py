@@ -46,19 +46,19 @@ def creating_files(input_path: str, output_path: str):
 
     file_name = "Deepsight"
     files = []
-    names_dict = {}
+    col_names_dict = {}
     c_size = 1000
 
     """ open the data fields and names dict; data_fields.txt signifies
         the naming convention of the columns in the original files and
         names_dict.txt will be what they will be renamed to (so that
         they are easier to understand and work with"""
-    with open(input_path + 'data_fields.txt') as file:
+    with open(input_path + 'deepsight_fields.txt') as file:
         data_fields = file.read().splitlines()
-    with open(input_path + 'names_dict.txt') as file:
+    with open(input_path + 'deepsight_dict.txt') as file:
         for line in file:
             (key, value) = line.split(':')
-            names_dict[str(key)] = value.rstrip()
+            col_names_dict[str(key)] = value.rstrip()
     files = get_files(input_path, file_name)
     """ create master df, resolve ASN's, rearrange df,
         and output to MASTER(1..n).csv
@@ -66,7 +66,7 @@ def creating_files(input_path: str, output_path: str):
     master_df = create_master_df(input_path,
                                  files, c_size,
                                  data_fields)
-    master_df.rename(columns=names_dict, inplace=True)
+    master_df.rename(columns=col_names_dict, inplace=True)
     master_df.to_csv(output_path + master_output)
     master_df = pd.read_csv(output_path + master_output,
                             low_memory=False)
@@ -180,12 +180,13 @@ def dropping_multiple_ips_asns(input_path: str, df: pd.DataFrame) -> pd.DataFram
         elif ip_addr[0].isdigit() is False:
             drop_set.add(x)
         elif len(ip_addr) > 15:
-            ip_list = df['IP_Address'][x].split(',')
-            for y in ip_list:
-                temp_rows = df.iloc[x].copy()
-                temp_rows['IP_Address'] = y
-                temp_rows['ASN'] = -1
-                temp_list.append(temp_rows)
+#            This is commented out for Aaron's part
+#            ip_list = df['IP_Address'][x].split(',')
+#            for y in ip_list:
+#                temp_rows = df.iloc[x].copy()
+#                temp_rows['IP_Address'] = y
+#                temp_rows['ASN'] = -1
+#                temp_list.append(temp_rows)
             drop_set.add(x)
         elif asn == 'nan':
             drop_set.add(x)
