@@ -11,4 +11,7 @@ Temp/**
 .vscode/
 .DS_Store
 !data/geolite_original.csv
+<<<<<<< HEAD
 ..bfg-report/**
+=======
+>>>>>>> bc6db839e29af88f2375eca2f795a2fa2fb75c13
