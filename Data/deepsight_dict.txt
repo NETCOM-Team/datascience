@@ -1,0 +1,16 @@
+id:ID
+data type:Data_Type
+sourcedate:Source_Date
+address:IP_Address
+asn:ASN
+confidence:Confidence
+connectioncarrier:Connection_Carrier
+connectionsecondlevel:Connection_Second_Level_Domain
+connectiontoplevel:Connection_Top_Level_Domain
+consecutivelistings:Consecutive_Listings
+hostility:Hostility
+locationcountrycode:Country_Code
+locationlatitude:Latitude
+locationlongitude:Longitude
+organizationnaics:Naics
+reputationrating:Reputation_Rating
