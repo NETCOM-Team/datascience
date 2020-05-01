@@ -18,7 +18,7 @@ aws_access_key_id=AKIAIIBY4JHILKMNOPQ
 aws_secret_access_key=oMXJicweRuMKhTBmmDBJIHLjkljHASFAj
 ```  
 
-To build the environment:  
+To build the environment on CentOS or RHEL:  
 
 ```bash
 docker-compose up
@@ -27,6 +27,7 @@ To destroy the environment:
 ```bash
 docker-compose down
 ```
+* On Debian you may need to run docker-compose with "sudo"
 
 After making custom changes/alterations to the build images or scripts run:  
 ```bash 
