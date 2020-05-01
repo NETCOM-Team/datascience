@@ -72,6 +72,11 @@ Native visualizations are provided within the pyton "app" container and can be e
 ```bash
 docker cp app:/file/path/within/container /host/path/target
 ```
+Do make sure that the visualizations functions are uncommented in the source code. Then you can run something like;
+```bash 
+docker cp app:datascience/top_10.pdf /path/to/save/file/to
+docker cp app:datascience/fast_mover.pdf /path/to/save/file/to
+```
 
 
 
