@@ -369,7 +369,7 @@ def top_10_badness_viz(asn_obj_dict: dict):
     plt.ylabel('Badness Score')
     plt.title("""Top 10 ASN's by Badness""")
     plt.show()
-
+    #plt.savefig(fast_mover.pdf)
 
 """ Displays a visual showing how much more 'bad' an ASN has been getting
     according to historical badness
@@ -389,7 +389,7 @@ def fast_mover_asn_viz(asn_number: int):
     plt.ylabel('Historical Badness')
     plt.title('Badness over time for ASN {}'.format(asn_number))
     plt.show()
-
+    #plt.savefig(fast_mover.pdf)
 
 """ initializes 600k ASN objects from scratch, used the first time
     'driver.py' is run
