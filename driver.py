@@ -2,7 +2,7 @@ print("in driver.py")
 
 import os
 import time
-import ASN
+from ASN import creating_asn_objects
 import redis
 
 
