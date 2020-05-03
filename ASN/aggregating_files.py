@@ -14,7 +14,7 @@ import ipaddress
 import re
 import time
 import pandas as pd
-#import ASN
+import ASN
 
 """ Aggregates the Deepsight data and outputs the new MASTER.csv (or MASTER2, MASTER3, ... , MASTERn.csv)
     based on how many times this program has been run (n) as part of the rolling ingestion process.
