@@ -2,7 +2,7 @@ print("in driver.py")
 
 import os
 import time
-from ASN import creating_asn_objects, aggregating_files, ordering_geolite, creating_lookups
+from ASN import creating_asn_objects, ordering_geolite, creating_lookups
 import redis
 
 
