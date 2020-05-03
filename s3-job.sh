@@ -12,7 +12,7 @@ aws s3 cp s3://$BUCKET_NAME data/ --exclude MASTER.csv --exclude ASN_Scores.csv 
 
 while true
 do
-    aws s3 sync s3://$BUCKET_NAME data/ --exclude MASTER.csv --exclude ASN_Scores.csv --exclude clean-manifest.json --exclude asn-manifest.json --exclude dashboard_testing*.csv
+    aws s3 sync s3://$BUCKET_NAME data/ --exclude MASTER.csv --exclude ASN_Scores.csv --exclude clean-manifest.json --exclude asn-manifest.json --exclude dashboard_testing*.csv --exclude ASN_Scores*.csv
 done
 
 
