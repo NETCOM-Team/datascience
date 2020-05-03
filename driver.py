@@ -24,6 +24,7 @@ import redis
 """
 def main():
     """Driver function for ASN Program"""
+    print("inside driver")
     start_time = time.time()
     input_path = 'data/'
     output_path = 'master/'
