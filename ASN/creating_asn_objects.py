@@ -19,7 +19,7 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-import ASN as AL
+from . import aggregating_files
 
 class Event:
 
@@ -589,12 +589,12 @@ def adding_tor(asn_objects, output_path, input_path):
         for line in file:
             (key, value) = line.split(':')
             col_names_dict[str(key)] = value.rstrip()
-    files = AL.aggregating_files.get_files(input_path, 'Tor')
+    files = aggregating_files.get_files(input_path, 'Tor')
     """ create master df, resolve ASN's, rearrange df,
         and output to MASTER(1..n).csv
     """
     if files:
-        tor_df = AL.aggregating_files.create_master_df(input_path,
+        tor_df = aggregating_files.create_master_df(input_path,
                                                        files, 1000,
                                                        data_fields)
         tor_df.rename(columns=col_names_dict, inplace=True)

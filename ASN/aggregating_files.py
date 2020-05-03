@@ -14,7 +14,7 @@ import ipaddress
 import re
 import time
 import pandas as pd
-import ASN
+from . import creating_asn_objects
 
 """ Aggregates the Deepsight data and outputs the new MASTER.csv (or MASTER2, MASTER3, ... , MASTERn.csv)
     based on how many times this program has been run (n) as part of the rolling ingestion process.
@@ -31,7 +31,7 @@ def creating_files(input_path: str, output_path: str):
     master_output = '/MASTER.csv'
     """ Check whether or not this is part of the rolling ingest and not the initial run of the program
         If it is, change the name of the master version which is being output"""
-    redis_instance = ASN.creating_asn_objects.start_redis()
+    redis_instance = creating_asn_objects.start_redis()
     if redis_instance.exists('master_version'):
         print('inside creating_files;')
         master_version = int(redis_instance.get('master_version').decode('utf-8'))
@@ -40,9 +40,9 @@ def creating_files(input_path: str, output_path: str):
         if master_version > 1:
             print('master version bigger than 1?: {}'.format(master_version))
             master_output = '/MASTER' + str(master_version) + '.csv'
-            ASN.creating_asn_objects.stop_redis(redis_instance)
+            creating_asn_objects.stop_redis(redis_instance)
     else:
-        ASN.creating_asn_objects.stop_redis(redis_instance)
+        creating_asn_objects.stop_redis(redis_instance)
 
     file_name = "Deepsight"
     files = []
