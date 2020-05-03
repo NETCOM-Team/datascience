@@ -1,11 +1,9 @@
 #!/bin/bash
 
-
-
 while true
 do
     #watches the data directory for updates from aws s3 sync in the s3-job.sh
-    inotifywait -e create data/
+    inotifywait -e close_write data/
     echo "inotify exited, moving onto calling driver.py"
     #when inotifywait triggers, call our driver.py to compile updates in data/
     python driver.py && echo "printing b/c we are executing the most important line"
