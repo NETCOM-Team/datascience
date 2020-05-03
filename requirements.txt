@@ -3,5 +3,5 @@ matplotlib
 ipaddress
 networkx
 scipy
-redis
+redis==3.4
 numpy
