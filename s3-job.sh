@@ -1,5 +1,5 @@
 #!/bin/bash
-
+su root
 
 #make directory to store our bucket files locally; make directory to save our MASTER.csv merge-file.
 
