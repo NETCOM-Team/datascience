@@ -31,4 +31,5 @@ def setup_redis() -> redis.StrictRedis:
         redis_instance.set('master_version', 1)
     return redis_instance
 
+print("in driver.py")
 main()
