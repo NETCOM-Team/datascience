@@ -21,7 +21,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && /usr/bin/python3.
 RUN /usr/bin/python3.7 -m pip install --upgrade setuptools pip && /usr/bin/python3.7 -m pip install -r requirements.txt
 
 RUN curl -s "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-&& unzip awscliv2.zip && ./aws/install 1&>/dev/null && echo "aws installed\n"
+&& unzip awscliv2.zip && ./aws/install
 
 
 RUN chmod a+x ${APPROOT}/${APP} && chmod +x s3-job.sh && chmod +x driver.py && chmod +x trigger.sh
