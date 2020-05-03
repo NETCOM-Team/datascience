@@ -13,7 +13,6 @@ COPY ["Data", "data/"]
 COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["./trigger.sh", "${APPROOT}"]
-COPY ["ASN", "ASN/"]
 COPY ["./requirements.txt", "${APPROOT}"]
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && /usr/bin/python3.7 get-pip.py
