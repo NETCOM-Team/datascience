@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:3.7
 ENV PYTHONUNBUFFERED 0
 ENV REDIS_HOST redis
 ENV REDIS_PORT 6379
@@ -16,8 +16,10 @@ COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["ASN", "ASN/"]
 COPY ["./requirements.txt", "${APPROOT}"]
 
-RUN pip3 install --upgrade setuptools pip && pip3 install -r requirements.txt
-RUN curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && /usr/bin/python3.7 get-pip.py
+RUN /usr/bin/python3.7 -m pip install --upgrade setuptools pip && /usr/bin/python3.7 -m pip install -r requirements.txt
+
+RUN curl -s "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
 && unzip awscliv2.zip && ./aws/install
 
 

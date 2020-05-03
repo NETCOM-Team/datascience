@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: django/redis_demo/django_redis_demo/Dockerfile
-    command: bash -c "python django/redis_demo/django_redis_demo/manage.py makemigrations && python django/redis_demo/django_redis_demo/manage.py migrate && cd django/redis_demo/django_redis_demo/ && gunicorn django_redis_demo.wsgi --bind 0.0.0.0:8000"
+    command: bash -c "python django/redis_demo/django_redis_demo/manage.py makemigrations && python django/redis_demo/django_redis_demo/manage.py migrate && cd django/redis_demo/django_redis_demo/ && gunicorn django_redis_demo.wsgi --bind 0.0.0.0:80"
     volumes:
       - .:/code
     ports:
