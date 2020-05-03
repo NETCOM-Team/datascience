@@ -19,7 +19,7 @@ import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-from . import aggregating_files
+from ASN import aggregating_files
 
 class Event:
 
