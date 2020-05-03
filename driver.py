@@ -12,7 +12,7 @@ def main():
     output_path = 'master/'
     redis_instance = setup_redis()
     setup_directories(input_path, output_path)
-    aggregating_files.creating_files(input_path, output_path)
+    creating_asn_objects.creating_files(input_path, output_path)
     creating_asn_objects.creating_asns(output_path, input_path)
     creating_asn_objects.stop_redis(redis_instance)
 
