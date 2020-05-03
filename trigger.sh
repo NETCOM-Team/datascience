@@ -7,6 +7,7 @@ do
     #watches the data directory for updates from aws s3 sync in the s3-job.sh
     inotifywait -e create data/
     echo "inotify exited, moving onto calling driver.py"
+    python -c 'print("hello world")'
     #when inotifywait triggers, call our driver.py to compile updates in data/
     ./driver.py && echo "this line calls driver directly"
     echo "driver exited"
