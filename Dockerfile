@@ -13,6 +13,7 @@ RUN echo "root" >> /etc/incron.allow
 COPY ["Data", "data/"]
 COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
+COPY ["./test.py", "${APPROOT}"]
 COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["./requirements.txt", "${APPROOT}"]
 

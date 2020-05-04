@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 print("in driver.py")
 
 import os
@@ -6,24 +7,15 @@ import pandas as pd
 import redis
 import json
 import csv
-import os
-import pandas as pd
 import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
-
 import ipaddress
 import re
-import time
 
-#creating lookups
-import ipaddress
-import pandas as pd
 
-#geolite lookups
-import ipaddress
-import time
-import pandas as pd
+
+
 
 
 def main():
