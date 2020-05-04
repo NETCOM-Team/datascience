@@ -1,6 +1,10 @@
 # Deployment
 
-Note: Requires you to have **docker desktop** installed on your system.
+Note: Requires you to have **docker desktop** and **docker-compose** installed on your system.
+
+__Ensure that TCP port 8000 is exposed for external systems to query the API__
+
+Run the following:  
 
 ```bash
 git clone https://github.com/cmunetcoms20/datascience.git
@@ -11,14 +15,16 @@ Add your bucket name, aws account id number, aws_access_key_id, and aws_secret_a
 Example .env file:
 
 ```bash
+#the name of S3 bucket where threat intelligence feeds are stored
 BUCKET_NAME=analytics-pipeline-cmucybercom
+#the region of your S3 bucket
 REGION=us-east-1
 ACCOUNT_ID=444558412345
 aws_access_key_id=AKIAIIBY4JHILKMNOPQ
 aws_secret_access_key=oMXJicweRuMKhTBmmDBJIHLjkljHASFAj
 ```  
 
-To build the environment on CentOS or RHEL:  
+To build the environment on CentOS, RHEL, or Debian:  
 
 ```bash
 docker-compose up
@@ -34,6 +40,12 @@ After making custom changes/alterations to the build images or scripts run:
 docker-compose up --build
 ```
 To execute a build without relying on cached docker objects.  
+
+To fully destroy all containers and cached components:  
+
+```bash
+docker system prune -a
+```
 
 ## Django API
 
