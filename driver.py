@@ -14,7 +14,7 @@ import time
 
 def main():
     start_time = time.time()
-    inputPath = 'data/'
+    inputPath = 'data'
     outputPath = 'master/'
     if not os.path.isdir(inputPath):
         os.mkdir(inputPath)
