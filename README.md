@@ -92,6 +92,8 @@ docker cp app:datascience/fast_mover.pdf /path/to/save/file/to
 ```
 
 
+(https://imgur.com/CLCj35z)[Stack Diagram]
+
 
 
 
