@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:latest
 ENV PYTHONUNBUFFERED 0
 ENV REDIS_HOST redis
 ENV REDIS_PORT 6379
@@ -15,6 +15,7 @@ COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["./requirements.txt", "${APPROOT}"]
+
 
 RUN python3 -m pip3 install --upgrade setuptools pip && python3 -m pip3 install -r requirements.txt
 
