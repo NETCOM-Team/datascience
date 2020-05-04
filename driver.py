@@ -23,6 +23,7 @@ import redis
     mentioned in the file description above
 
 """
+
 def main():
     """Driver function for ASN Program"""
     start_time = time.time()
