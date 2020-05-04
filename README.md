@@ -91,9 +91,12 @@ docker cp app:datascience/top_10.pdf /path/to/save/file/to
 docker cp app:datascience/fast_mover.pdf /path/to/save/file/to
 ```
 
+<img src="https://imgur.com/CLCj35z"/>
+!(image)[https://imgur.com/CLCj35z]
 
-![Imgur](https://imgur.com/CLCj35z)
 
+<img src="https://static01.bbi.io/2Wt9Tk.gif"/>
 
+!(image)[https://static01.bbi.io/2Wt9Tk.gif]
 
 
