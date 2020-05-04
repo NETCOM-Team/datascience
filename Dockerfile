@@ -14,7 +14,7 @@ COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["ASN", "ASN/"]
-COPY ["master/geolite_lookup.csv.zip", "master/"]
+COPY ["./geolite_lookup.csv.zip", "master/"]
 COPY ["./requirements.txt", "${APPROOT}"]
 
 RUN unzip master/geolite_lookup.csv.zip -d master/geolite_lookup.csv
