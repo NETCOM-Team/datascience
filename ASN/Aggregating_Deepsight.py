@@ -92,14 +92,17 @@ def get_files(inputPath, fileNames):
 def create_ip_url_master_df(inputPath, outputPath, files, c_size, data_fields, outputName):
     df = pd.DataFrame()
     for file in files:
-        df_chunk = pd.DataFrame()
-        for chunk in pd.read_csv(inputPath + '/' + file,chunksize=c_size, usecols=data_fields):
-            df_chunk = pd.concat([df_chunk, chunk])
+        try:
+            df_chunk = pd.DataFrame()
+            for chunk in pd.read_csv(inputPath + '/' + file,chunksize=c_size, usecols=data_fields):
+                df_chunk = pd.concat([df_chunk, chunk])
 
-        df = pd.concat([df, df_chunk])
-#        df_chunk.to_csv(outputPath + 'output_' + file)
+            df = pd.concat([df, df_chunk])
+    #        df_chunk.to_csv(outputPath + 'output_' + file)
 
-#    df.to_csv(outputPath + 'output_' + outputName + '.csv')
+    #    df.to_csv(outputPath + 'output_' + outputName + '.csv')
+        except:
+            continue
     return df
 
 #Getting rid of multiple IPs and ASNs
