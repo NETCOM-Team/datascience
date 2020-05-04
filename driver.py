@@ -464,22 +464,25 @@ def updating_master_and_scores(master_df: pd.DataFrame, asn_objects: list,
 
     for number in range(len(master_df.index)):
         as_number = master_df['ASN'][number]
-        temp_event = Event(master_df['ID'][number],
-                           master_df['IP_Address'][number],
-                           master_df['Confidence'][number],
-                           master_df['Hostility'][number],
-                           master_df['Reputation_Rating'][number])
-        asn_objects[as_number].events_list.append(temp_event)
-        event_score.append(temp_event.create_score())
-        if asn_objects[as_number].total_ips == 0:
-            asn = asn_objects[as_number].as_number
-            asn_objects[as_number].total_ips = geolite_df['Total_IPs'][asn]
-            asn_objects[as_number].set_total_ips()
-        asn_objects[as_number].create_score()
-        asn_objects[as_number].create_badness()
-        asn_chrono_score_list.append(asn_objects[as_number].badness)
-        asn_objects[as_number].has_events = True
-
+        try:
+            temp_event = Event(master_df['ID'][number],
+                            master_df['IP_Address'][number],
+                            master_df['Confidence'][number],
+                            master_df['Hostility'][number],
+                            master_df['Reputation_Rating'][number])
+        
+            asn_objects[as_number].events_list.append(temp_event)
+            event_score.append(temp_event.create_score())
+            if asn_objects[as_number].total_ips == 0:
+                asn = asn_objects[as_number].as_number
+                asn_objects[as_number].total_ips = geolite_df['Total_IPs'][asn]
+                asn_objects[as_number].set_total_ips()
+            asn_objects[as_number].create_score()
+            asn_objects[as_number].create_badness()
+            asn_chrono_score_list.append(asn_objects[as_number].badness)
+            asn_objects[as_number].has_events = True
+        except:
+            continue
     master_df['Event_Score'] = event_score
     master_df['Historical_Score'] = asn_chrono_score_list
     master_df.to_csv(master_input)
