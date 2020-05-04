@@ -991,7 +991,7 @@ def create_geolite_lookup(input_path: str , output_path: str):
     current_asn = 0
     current_ip_total = 0
     for index, row in geo_df.iterrows():
-        print("current_asn: " + current_asn)
+        print("current_asn: " + str(current_asn))
         if int(row['ASN']) == current_asn:
             current_ip_total += ipaddress.ip_network(row['IP_CIDR']).num_addresses
         else:
