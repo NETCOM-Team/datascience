@@ -70,7 +70,7 @@ def getASNdetails(asnList):
         else:
             deserialized = json.loads(serialized_asn)
             risk_dictionary = {}
-            risk_dictionary[asn] = deserialized
+            risk_dictionary[asn] = deserialized["score"]
             response_list.append(risk_dictionary)
 
     response = {
