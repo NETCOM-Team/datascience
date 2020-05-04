@@ -17,7 +17,7 @@ COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["./requirements.txt", "${APPROOT}"]
 
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py
-RUN python3 -m pip install --upgrade setuptools pip && python3 -m pip install -r requirements.txt
+RUN pip install --upgrade setuptools pip && pip install -r requirements.txt
 
 RUN curl -s "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
 && unzip awscliv2.zip && ./aws/install
