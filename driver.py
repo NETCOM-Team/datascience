@@ -3,7 +3,7 @@ print("in driver.py")
 import os
 import time
 import pkg_resources
-pkg_resources.require("redis==3.4.0")
+pkg_resources.require("redis==3.4")
 import redis
 
 import json
