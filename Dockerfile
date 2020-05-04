@@ -16,7 +16,7 @@ COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["./requirements.txt", "${APPROOT}"]
 
-RUN sudo apt-get install python3-pip
+RUN apt-get install python3-pip
 RUN python3 -m pip install --upgrade setuptools pip && python3 -m pip install -r requirements.txt
 
 RUN curl -s "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
