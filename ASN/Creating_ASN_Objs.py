@@ -136,7 +136,7 @@ def creating_asns(outputPath):
     MAX_RANGE = 600000
     for x in range(0,MAX_RANGE):
         asn_objects.append(ASN(x))
-    geolite_df = pd.read_csv(geolite_input)
+    geolite_df = pd.read_csv(open(geolite_input, 'rU'), encoding='utf-8', engine='c')
     master_df = pd.read_csv(master_input, low_memory=False)
     master_df.sort_values(by=['ASN','Source_Date'], inplace=True)
     asn_chrono_score_list = []
