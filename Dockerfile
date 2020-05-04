@@ -7,6 +7,7 @@ LABEL maintainer="rmccarth@andrew.cmu.edu"
 
 RUN mkdir ASN && mkdir data && mkdir master
 RUN apt-get update -y && apt-get install -y --no-install-recommends inotify-tools
+RUN apt install python-setuptools -y
 RUN echo "root" >> /etc/incron.allow
 
 COPY ["Data", "data/"]

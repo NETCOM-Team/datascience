@@ -3,5 +3,6 @@ matplotlib
 ipaddress
 networkx
 scipy
+pkg_resources
 redis==3.4
 numpy
