@@ -14,8 +14,10 @@ COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["ASN", "ASN/"]
+COPY ["master/geolite_lookup.csv.zip", "master/"]
 COPY ["./requirements.txt", "${APPROOT}"]
 
+RUN unzip master/geolite_lookup.csv.zip -d master/geolite_lookup.csv
 RUN pip3 install --upgrade setuptools pip && pip3 install -r requirements.txt
 RUN curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
 && unzip awscliv2.zip && ./aws/install
