@@ -18,7 +18,7 @@ aws_access_key_id=AKIAIIBY4JHILKMNOPQ
 aws_secret_access_key=oMXJicweRuMKhTBmmDBJIHLjkljHASFAj
 ```  
 
-To build the environment:  
+To build the environment on CentOS or RHEL:  
 
 ```bash
 docker-compose up
@@ -27,6 +27,7 @@ To destroy the environment:
 ```bash
 docker-compose down
 ```
+* On Debian you may need to run docker-compose with "sudo"
 
 After making custom changes/alterations to the build images or scripts run:  
 ```bash 
@@ -71,6 +72,11 @@ Native visualizations are provided within the pyton "app" container and can be e
 
 ```bash
 docker cp app:/file/path/within/container /host/path/target
+```
+Do make sure that the visualizations functions are uncommented in the source code. Then you can run something like;
+```bash 
+docker cp app:datascience/top_10.pdf /path/to/save/file/to
+docker cp app:datascience/fast_mover.pdf /path/to/save/file/to
 ```
 
 

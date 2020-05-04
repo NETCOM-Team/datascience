@@ -1,0 +1,5 @@
+id
+asn
+ip
+firstseen
+countrycode

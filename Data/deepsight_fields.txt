@@ -1,0 +1,16 @@
+id
+data type
+sourcedate
+address
+asn
+confidence
+connectioncarrier
+connectionsecondlevel
+connectiontoplevel
+consecutivelistings
+hostility
+locationcountrycode
+locationlatitude
+locationlongitude
+organizationnaics
+reputationrating

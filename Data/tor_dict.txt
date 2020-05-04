@@ -1,0 +1,5 @@
+id:ID
+asn:ASN
+countrycode:Country_Code
+ip:IP
+firstseen:First_Seen
