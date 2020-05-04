@@ -565,8 +565,8 @@ Returns
     redis_instance (redis.StrictRedis): the initialized Redis DB instance
 """
 def start_redis() -> redis.StrictRedis:
-    #redis_host = os.getenv('REDIS_HOST')
-    redis_instance = redis.StrictRedis(host='redis', port=6379)
+    redis_host = os.getenv('REDIS_HOST')
+    redis_instance = redis.StrictRedis(host=redis_host, port=6379)
     return redis_instance
 
 """ stops a StrictRedis instance

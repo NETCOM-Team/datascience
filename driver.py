@@ -16,6 +16,7 @@ Created on Tue Feb 11 09:52:06 2020
 import os
 import time
 import ASN
+import pkg_resources
 import redis
 
 """ The main function of the program; calls ASN library functions for performing the tasks
