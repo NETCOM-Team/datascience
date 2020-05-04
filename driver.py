@@ -2,12 +2,13 @@ print("in driver.py")
 
 import os
 import time
+import pkg_resources
+pkg_resources.require("redis==3.4.0")
 import redis
 
 import json
 import csv
 import os
-import redis
 import pandas as pd
 import networkx as nx
 import numpy as np
