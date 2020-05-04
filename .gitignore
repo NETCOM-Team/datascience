@@ -1,3 +1,4 @@
+geolite_lookup.csv
 data/**
 output/**
 *.csv

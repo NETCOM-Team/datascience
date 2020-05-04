@@ -10,12 +10,14 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends inotify-tool
 RUN echo "root" >> /etc/incron.allow
 
 COPY ["Data", "data/"]
+COPY ["master/geolite_lookup.csv.zip", "master/"]
 COPY ["./driver.py", "${APPROOT}"]
 COPY ["./s3-job.sh", "${APPROOT}"]
 COPY ["./test.py", "${APPROOT}"]
 COPY ["./trigger.sh", "${APPROOT}"]
 COPY ["./requirements.txt", "${APPROOT}"]
 
+RUN unzip master/geolite_lookup.csv.zip -d master/ && chmod 777 master/geolite_lookup.csv
 RUN curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 RUN python get-pip.py
 RUN pip3 install --upgrade setuptools
