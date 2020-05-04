@@ -3,6 +3,8 @@ print("in driver.py")
 
 import os
 import time
+import sys
+print(sys.path)
 import pandas as pd
 import redis
 import json
@@ -12,11 +14,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ipaddress
 import re
-
-
-
-
-
 
 def main():
     """Driver function for ASN Program"""
