@@ -147,6 +147,9 @@ def create_master_df(input_path: str, files: list,
             df_chunk = pd.concat([df_chunk, chunk])
 
         df = pd.concat([df, df_chunk], sort=False)
+    # Hostility used later force it to be created here
+    if 'hostility' not in df.columns:
+        df['hostility'] = None
     print('This is the length: ', len(df.index))
     return df
 
