@@ -16,7 +16,7 @@ Example .env file:
 
 ```bash
 #the name of S3 bucket where threat intelligence feeds are stored
-BUCKET_NAME=analytics-pipeline-cmucybercom
+BUCKET_NAME=threat-intelligence-feed-bucket
 #the region of your S3 bucket
 REGION=us-east-1
 ACCOUNT_ID=444558412345
