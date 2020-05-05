@@ -187,19 +187,19 @@ def dropping_multiple_ips_asns(input_path: str, df: pd.DataFrame) -> pd.DataFram
             drop_set.add(x)
         elif len(ip_addr) > 15:
             #            This is commented out for Aaron's part
-#            ip_list = df['IP_Address'][x].split(',')
-#            for y in ip_list:
-#                temp_rows = df.iloc[x].copy()
-#                temp_rows['IP_Address'] = y
-#                temp_rows['ASN'] = 0
-#                temp_rows['Connection_Carrier'] = None
-#                temp_rows['Connection_Second_Level_Domain'] = None
-#                temp_rows['Connection_Top_Level_Domain'] = None
-#                temp_rows['Country_Code'] = None
-#                temp_rows['Latitude'] = 0
-#                temp_rows['Longitude'] = 0
-#                temp_rows['Naics'] = None
-#                temp_list.append(temp_rows)
+            ip_list = df['IP_Address'][x].split(',')
+            for y in ip_list:
+                temp_rows = df.iloc[x].copy()
+                temp_rows['IP_Address'] = y
+                temp_rows['ASN'] = 0
+                temp_rows['Connection_Carrier'] = None
+                temp_rows['Connection_Second_Level_Domain'] = None
+                temp_rows['Connection_Top_Level_Domain'] = None
+                temp_rows['Country_Code'] = None
+                temp_rows['Latitude'] = 0
+                temp_rows['Longitude'] = 0
+                temp_rows['Naics'] = None
+                temp_list.append(temp_rows)
             drop_set.add(x)
         elif(len(str(df['Data_Type'][x])) > 50):
             drop_set.add(x)

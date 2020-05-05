@@ -20,6 +20,7 @@ import networkx as nx
 import numpy as np
 import matplotlib.pyplot as plt
 import ASN as AL
+import pprint
 
 class Event:
 
@@ -477,9 +478,15 @@ def get_serialized_list(redis_instance: redis.StrictRedis) -> list:
                     event_list.append(Event(asn_obj_dict['events_list'][i]['event_id'],
                         asn_obj_dict['events_list'][i]['ip_address'], asn_obj_dict['events_list'][i]['confidence'],
                         asn_obj_dict['events_list'][i]['hostility'], asn_obj_dict['events_list'][i]['reputation_rating']))
-
                 asn_obj_dict['events_list'] = event_list
-
+            if asn_obj_dict['tor_list'] != []:
+                tor_list = []
+                for i in range(0, len(asn_obj_dict['tor_list'])):
+                    tor_list.append(Tor(asn_obj_dict['tor_list'][i]['ip'],
+                                    asn_obj_dict['tor_list'][i]['asn'],
+                                    asn_obj_dict['tor_list'][i]['country_code'],
+                                    asn_obj_dict['tor_list'][i]['first_seen']))
+                asn_obj_dict['tor_list'] = tor_list
             temp_obj = ASN(int(key.decode('utf-8')))
             temp_obj = ASN.set_asn_attrs(temp_obj,
                                          asn_obj_dict['badness'],
@@ -489,6 +496,7 @@ def get_serialized_list(redis_instance: redis.StrictRedis) -> list:
                                          asn_obj_dict['has_events'],
                                          asn_obj_dict['score'],
                                          asn_obj_dict['total_ips'])
+
             asn_objs.append(temp_obj)
         except KeyError as e:
             print('KeyError: {}'.format(e))
