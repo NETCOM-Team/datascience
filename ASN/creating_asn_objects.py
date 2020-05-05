@@ -194,8 +194,7 @@ class ASN:
     @staticmethod
     def set_asn_attrs(asn_obj: object, badness: float, ev_centrality: float,
                       events_list: list, tor_list: list, has_events: bool,
-                      katz_centrality: float, score: float,
-                      total_ips: int) -> object:
+                      score: float, total_ips: int) -> object:
 
         """sets the attributes of an ASN object"""
         asn_obj.badness = badness
@@ -203,7 +202,6 @@ class ASN:
         asn_obj.events_list = events_list
         asn_obj.tor_list = tor_list
         asn_obj.has_events = has_events
-        asn_obj.katz_centrality = katz_centrality
         asn_obj.score = score
         asn_obj.total_ips = total_ips
         return asn_obj
@@ -431,7 +429,11 @@ def updating_master_and_scores(master_df: pd.DataFrame, asn_objects: list,
                            master_df['Confidence'][number],
                            master_df['Hostility'][number],
                            master_df['Reputation_Rating'][number])
-        asn_objects[as_number].events_list.append(temp_event)
+        try:
+            asn_objects[as_number].events_list.append(temp_event)
+        except:
+            print("This number is the exception {}".format(as_number))
+            print("This is the length of ASN object {}".format(len(asn_objects)))
         event_score.append(temp_event.create_score())
         if asn_objects[as_number].total_ips == 0:
             asn = asn_objects[as_number].as_number
@@ -479,21 +481,27 @@ def get_serialized_list(redis_instance: redis.StrictRedis) -> list:
                 asn_obj_dict['events_list'] = event_list
 
             temp_obj = ASN(int(key.decode('utf-8')))
-            temp_obj = ASN.set_asn_attrs(temp_obj, asn_obj_dict['badness'], asn_obj_dict['ev_centrality'], asn_obj_dict['events_list'],
-                                    asn_obj_dict['has_events'], asn_obj_dict['katz_centrality'], asn_obj_dict['score'],
-                                    asn_obj_dict['total_ips'])
+            temp_obj = ASN.set_asn_attrs(temp_obj,
+                                         asn_obj_dict['badness'],
+                                         asn_obj_dict['ev_centrality'],
+                                         asn_obj_dict['events_list'],
+                                         asn_obj_dict['tor_list'],
+                                         asn_obj_dict['has_events'],
+                                         asn_obj_dict['score'],
+                                         asn_obj_dict['total_ips'])
             asn_objs.append(temp_obj)
-        except KeyError:
-            pass
-        except ValueError:
-            pass
-        except redis.exceptions.ResponseError:
-            pass
-        except AttributeError:
-            pass
+        except KeyError as e:
+            print('KeyError: {}'.format(e))
+        except ValueError as e:
+            print('ValueErrorr: {}'.format(e))
+        except redis.exceptions.ResponseError as e:
+            print('Redisr: {}'.format(e))
+        except AttributeError as e:
+            print('AttributeError: {}'.format(e))
 
     print('done deserializing')
     asn_objs = sorted(asn_objs, key=lambda x: x.as_number)
+    print('What is the length of objs: {}'.format(len(asn_objs)))
     return asn_objs
 
 """ This function creates the ASN graph, gets the eigenvector centralities
@@ -531,6 +539,7 @@ Args
 """
 def outputting_asns(output_file: str, asn_objects: list):
     """Outputting ASN Scores."""
+    print('Outputting ASNs')
     redis_instance = start_redis()
     with open(output_file, 'w') as file:
         writer = csv.writer(file)

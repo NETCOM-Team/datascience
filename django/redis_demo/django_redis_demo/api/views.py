@@ -62,7 +62,7 @@ def getASNdetails(asnList):
         serialized_asn = redis_instance.get(asn)
 
         # if there is not an asn object for this asn it returns None
-        if serialized_asn == None:
+        if serialized_asn is None:
             # create a dictionary to store our single asn object
             risk_dictionary = {}
             risk_dictionary[asn] = "no known score"
@@ -70,7 +70,7 @@ def getASNdetails(asnList):
         else:
             deserialized = json.loads(serialized_asn)
             risk_dictionary = {}
-            risk_dictionary[asn] = deserialized
+            risk_dictionary[asn] = deserialized["score"]
             response_list.append(risk_dictionary)
 
     response = {

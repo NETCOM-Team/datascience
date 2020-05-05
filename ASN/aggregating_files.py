@@ -32,17 +32,7 @@ def creating_files(input_path: str, output_path: str):
     """ Check whether or not this is part of the rolling ingest and not the initial run of the program
         If it is, change the name of the master version which is being output"""
     redis_instance = ASN.creating_asn_objects.start_redis()
-    if redis_instance.exists('master_version'):
-        print('inside creating_files;')
-        master_version = int(redis_instance.get('master_version').decode('utf-8'))
-        print('master version: {}'.format(master_version))
-        print('master version type: {}'.format(type(master_version)))
-        if master_version > 1:
-            print('master version bigger than 1?: {}'.format(master_version))
-            master_output = '/MASTER' + str(master_version) + '.csv'
-            ASN.creating_asn_objects.stop_redis(redis_instance)
-    else:
-        ASN.creating_asn_objects.stop_redis(redis_instance)
+    master_output = check_redis(redis_instance, master_output)
 
     file_name = "Deepsight"
     files = []
@@ -72,6 +62,19 @@ def creating_files(input_path: str, output_path: str):
                             low_memory=False)
     master_df = dropping_multiple_ips_asns(input_path, master_df)
     master_df.to_csv(output_path + master_output)
+
+
+def check_redis(redis_instance, master_output):
+    if redis_instance.exists('master_version'):
+        print('inside creating_files;')
+        master_version = int(redis_instance.get('master_version').decode('utf-8'))
+        print('master version: {}'.format(master_version))
+        print('master version type: {}'.format(type(master_version)))
+        if master_version > 1:
+            print('master version bigger than 1?: {}'.format(master_version))
+            master_output = '/MASTER' + str(master_version) + '.csv'
+    ASN.creating_asn_objects.stop_redis(redis_instance)
+    return master_output
 
 """ This function collects the Deepsight files and returns a list of all of them
     with newly named and parsed columns.
@@ -180,13 +183,22 @@ def dropping_multiple_ips_asns(input_path: str, df: pd.DataFrame) -> pd.DataFram
         elif ip_addr[0].isdigit() is False:
             drop_set.add(x)
         elif len(ip_addr) > 15:
-#            This is commented out for Aaron's part
+            #            This is commented out for Aaron's part
 #            ip_list = df['IP_Address'][x].split(',')
 #            for y in ip_list:
 #                temp_rows = df.iloc[x].copy()
 #                temp_rows['IP_Address'] = y
-#                temp_rows['ASN'] = -1
+#                temp_rows['ASN'] = 0
+#                temp_rows['Connection_Carrier'] = None
+#                temp_rows['Connection_Second_Level_Domain'] = None
+#                temp_rows['Connection_Top_Level_Domain'] = None
+#                temp_rows['Country_Code'] = None
+#                temp_rows['Latitude'] = 0
+#                temp_rows['Longitude'] = 0
+#                temp_rows['Naics'] = None
 #                temp_list.append(temp_rows)
+            drop_set.add(x)
+        elif(len(str(df['Data_Type'][x])) > 50):
             drop_set.add(x)
         elif asn == 'nan':
             drop_set.add(x)
@@ -202,6 +214,8 @@ def dropping_multiple_ips_asns(input_path: str, df: pd.DataFrame) -> pd.DataFram
     df = df.append(temp_df)
     df['ASN'] = pd.to_numeric(df['ASN'], downcast='integer')
     df.sort_values(by=['ASN', 'Source_Date'], inplace=True)
+    df = df[df.ASN != 0]
+    df = df.reset_index(drop=True)
     return df
 
 """ This function resolves an ASN and checks which IP addresses
