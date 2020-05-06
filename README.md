@@ -24,9 +24,10 @@ aws_access_key_id=AKIAIIBY4JHILKMNOPQ
 aws_secret_access_key=oMXJicweRuMKhTBmmDBJIHLjkljHASFAj
 ```  
 
-To build the environment on CentOS, RHEL, or Debian:  
+To build the environment on CentOS, RHEL, Debian, or macOS:  
 
 ```bash
+sysctl vm.overcommit_memory=1
 docker-compose up
 ```
 To destroy the environment:  
