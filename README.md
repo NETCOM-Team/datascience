@@ -99,7 +99,7 @@ docker cp app:datascience/fast_mover.pdf /path/to/save/file/to
 
 A demonstration of the application stack being deployed:
 
-[![asciicast](https://asciinema.org/a/L5c49gSQMjyNhRqjoUEkcrGUn.svg)](https://asciinema.org/a/L5c49gSQMjyNhRqjoUEkcrGUn)
+https://asciinema.org/a/L5c49gSQMjyNhRqjoUEkcrGUn
 
 
 
