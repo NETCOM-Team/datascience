@@ -94,7 +94,9 @@ Do make sure that the visualizations functions are uncommented in the source cod
 docker cp app:datascience/top_10.pdf /path/to/save/file/to
 docker cp app:datascience/fast_mover.pdf /path/to/save/file/to
 ```
+A demonstration of the application stack being deployed:
 
+[![asciicast](https://asciinema.org/a/L5c49gSQMjyNhRqjoUEkcrGUn.svg)](https://asciinema.org/a/L5c49gSQMjyNhRqjoUEkcrGUn)
 
 ![image](https://imgur.com/CLCj35z.jpg)
 
