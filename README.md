@@ -47,6 +47,9 @@ To fully destroy all containers and cached components:
 ```bash
 docker system prune -a
 ```
+To persist the application stack beyond an SSH session - one may choose to run the application stack as a service on the system, or in a screen session. We found screen to be reliable, however perhaps not the most robust for long-term deployments. 
+
+To use screen, start by running screen before executing docker-compose up. To then detach the screen and keep the stack running after exit, hold ctrl - a, and then press d.  
 
 ## Django API
 
