@@ -84,7 +84,7 @@ The environment will then monitor the s3 bucket for any future s3 files, rebuild
 
 The environment generates key-value pairs of the format ASN:risk_score and stores them in Redis for fast-lookups.
 
-Native visualizations are provided within the pyton "app" container and can be extracted as-needed:  
+Native visualizations are provided within the python "app" container and can be extracted as-needed:  
 
 ```bash
 docker cp app:/file/path/within/container /host/path/target
